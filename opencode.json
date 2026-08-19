@@ -1,0 +1,12 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+  
+    "model": "your-model",
+  
+    "mcp": {
+      "zod": {
+        "type": "remote",
+        "url": "https://mcp.inkeep.com/zod/mcp"
+      }
+    }
+  }
