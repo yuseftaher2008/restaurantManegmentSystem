@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { userRegisterData,userLoginData } from "../types/user.types";
+import type { RegisterInput } from "../validations/user.validation";
 
 
 export class UserRepository {
@@ -20,7 +20,7 @@ export class UserRepository {
         return prisma.user.findMany();
     }
 
-    async create(data:userRegisterData){
+    async create(data:RegisterInput){
         return prisma.user.create({
             data
         });

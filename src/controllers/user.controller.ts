@@ -1,6 +1,6 @@
 import type { Request,Response } from "express";
 import { UserService } from "../services/user.service";
-import { userRegisterData,userLoginData } from "../types/user.types";
+import type { RegisterInput, LoginInput } from "../validations/user.validation";
 
 const userService = new UserService();
 
@@ -9,7 +9,7 @@ export class UserController {
     async register(req:Request,res:Response){
 
         try{
-            const data:userRegisterData = req.body;
+            const data:RegisterInput = req.body;
             const user = await userService.userRegister(data);
             res.status(201).json({
                 message: "User registered successfully",
@@ -27,7 +27,7 @@ export class UserController {
     async login(req:Request,res:Response){
         
         try{
-            const data:userLoginData = req.body;
+            const data:LoginInput = req.body;
             const token:string = await userService.userLogin(data);
             res.json({
                 message:"user logged in successfully",
