@@ -6,36 +6,32 @@ type PrismaModelDelegate = {
     update(args: { where: { id: string }; data: any }): Promise<any>;
 };
 
-export class BaseRepository<T> {
+export abstract class BaseRepository<TModel, TCreateInput> {
     protected model: PrismaModelDelegate;
 
     constructor(model: PrismaModelDelegate) {
         this.model = model;
     }
 
-    async findById(id: string): Promise<T | null> {
+    async findById(id: string): Promise<TModel | null> {
         return this.model.findUnique({
             where: { id }
         });
     }
 
-    async findAll(): Promise<T[]> {
+    async findAll(): Promise<TModel[]> {
         return this.model.findMany();
     }
 
-    async create(data: any): Promise<T> {
-        return this.model.create({
-            data
-        });
-    }
+    abstract create(data: TCreateInput): Promise<TModel>;
 
-    async delete(id: string): Promise<T> {
+    async delete(id: string): Promise<TModel> {
         return this.model.delete({
             where: { id }
         });
     }
 
-    async update(id: string, data: any): Promise<T> {
+    async update(id: string, data: any): Promise<TModel> {
         return this.model.update({
             where: { id },
             data
