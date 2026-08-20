@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { UserController } from "../controllers/user.controller";
+import type { UserController } from "../controllers/user.controller";
 import { validate } from "../middlewares/validate";
 import { registerSchema, loginSchema } from "../validations/user.validation";
 
-const userController = new UserController();
+export function createUserRouter(userController: UserController) {
+    const router = Router();
 
-export const userRouter = Router(); 
+    router.post("/register", validate(registerSchema), (req, res) => userController.register(req, res));
+    router.post("/login", validate(loginSchema), (req, res) => userController.login(req, res));
 
-userRouter.post("/register", validate(registerSchema), userController.register);
-userRouter.post("/login", validate(loginSchema), userController.login);
+    return router;
+}

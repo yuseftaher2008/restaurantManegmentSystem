@@ -1,19 +1,17 @@
 import { prisma } from "../../lib/prisma";
-import type { RegisterInput } from "../validations/user.validation";
+import type { User } from "../../generated/prisma/client";
+import type { UserCreateInput } from "../../generated/prisma/models/User";
 import { BaseRepository } from "./base.repository";
 
-
-export class UserRepository extends BaseRepository<RegisterInput> {
+export class UserRepository extends BaseRepository<User> {
     
     constructor(){
         super(prisma.user);
     }
 
-
-    async findByEmail(email:string){
+    async findByEmail(email: string): Promise<User | null> {
         return prisma.user.findUnique({
-            where:{ email }
-        })
+            where: { email }
+        });
     }
-
 }

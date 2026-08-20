@@ -1,15 +1,13 @@
-import "dotenv/config"
-import { UserRepository } from "../repositories/user.repository";
+import type { UserRepository } from "../repositories/user.repository";
 import type { RegisterInput, LoginInput } from "../validations/user.validation";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const userRepository = new UserRepository();
-
 export class UserService {
+    constructor(private userRepository: UserRepository) {}
 
     async userRegister(data: RegisterInput) {
-        const existingUser = await userRepository.findByEmail(data.email);
+        const existingUser = await this.userRepository.findByEmail(data.email);
         if (existingUser) {
             throw new Error(`Registration failed`);
         }
@@ -17,7 +15,7 @@ export class UserService {
         const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
         const hashedPassword: string = await bcrypt.hash(data.password, saltRounds);
 
-        const user = await userRepository.create({
+        const user = await this.userRepository.create({
             ...data,
             password: hashedPassword
         });
@@ -28,7 +26,7 @@ export class UserService {
     }
 
     async userLogin(data: LoginInput) {
-        const existingUser = await userRepository.findByEmail(data.email);
+        const existingUser = await this.userRepository.findByEmail(data.email);
         if (!existingUser) {
             throw new Error('Invalid credentials');
         }

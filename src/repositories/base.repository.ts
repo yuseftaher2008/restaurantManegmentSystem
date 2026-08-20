@@ -1,41 +1,44 @@
-import { prisma } from "../../lib/prisma";
+type PrismaModelDelegate = {
+    findUnique(args: { where: { id: string } }): Promise<any>;
+    findMany(args?: any): Promise<any[]>;
+    create(args: { data: any }): Promise<any>;
+    delete(args: { where: { id: string } }): Promise<any>;
+    update(args: { where: { id: string }; data: any }): Promise<any>;
+};
 
 export class BaseRepository<T> {
-    protected model : any;
+    protected model: PrismaModelDelegate;
 
-    constructor (model:any){
-        this.model=model;
+    constructor(model: PrismaModelDelegate) {
+        this.model = model;
     }
 
-    async findById(id:string): Promise<T | null>{
+    async findById(id: string): Promise<T | null> {
         return this.model.findUnique({
-            where: { id } 
+            where: { id }
         });
     }
 
-    async findAll(): Promise<T[] | null>{
+    async findAll(): Promise<T[]> {
         return this.model.findMany();
     }
 
-    async create(data:T): Promise<T | null>{
+    async create(data: any): Promise<T> {
         return this.model.create({
             data
         });
     }
 
-    async delete(id:string){
+    async delete(id: string): Promise<T> {
         return this.model.delete({
             where: { id }
         });
     }
 
-    async update(id:string,data:any): Promise<T | null>{
+    async update(id: string, data: any): Promise<T> {
         return this.model.update({
             where: { id },
             data
         });
     }
-
-
-
 }
