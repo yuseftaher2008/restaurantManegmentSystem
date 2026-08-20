@@ -5,6 +5,18 @@
     "target": "ES2023",
     "strict": true,
     "esModuleInterop": true,
-    
-  }
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+
+  "include": [
+    "src/**/*",
+    "lib/**/*",
+    "generated/**/*"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "prisma.config.ts"
+  ]
 }
