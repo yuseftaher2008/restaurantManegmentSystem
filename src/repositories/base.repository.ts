@@ -7,10 +7,8 @@ type PrismaModelDelegate = {
 };
 
 export abstract class BaseRepository<TModel, TCreateInput> {
-    protected model: PrismaModelDelegate;
-
-    constructor(model: PrismaModelDelegate) {
-        this.model = model;
+    
+    constructor(protected model: PrismaModelDelegate) {
     }
 
     async findById(id: string): Promise<TModel | null> {

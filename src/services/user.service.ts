@@ -1,12 +1,13 @@
 import type { UserRepository } from "../repositories/user.repository";
-import type { RegisterInput, LoginInput } from "../validations/user.validation";
+import type { User } from "../../generated/prisma/client";
+import type { RegisterInput, LoginInput, UpdateUserInput } from "../validations/user.validation";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export class UserService {
     constructor(private userRepository: UserRepository) {}
 
-    async userRegister(data: RegisterInput) {
+    async userRegister(data: RegisterInput): Promise<Omit<User, 'password'>> {
         const existingUser = await this.userRepository.findByEmail(data.email);
         if (existingUser) {
             throw new Error(`Registration failed`);
@@ -27,7 +28,7 @@ export class UserService {
         return safeUser;
     }
 
-    async userLogin(data: LoginInput) {
+    async userLogin(data: LoginInput): Promise<string> {
         const existingUser = await this.userRepository.findByEmail(data.email);
         if (!existingUser) {
             throw new Error('Invalid credentials');
@@ -45,5 +46,23 @@ export class UserService {
         );
 
         return token;
+    }
+
+    async userDelete(id: string): Promise<void> {
+        const existingUser = await this.userRepository.findById(id);
+        if (!existingUser) {
+            throw new Error('User not found');
+        }
+        await this.userRepository.delete(id);
+    }
+
+    async userUpdate(id: string, data: UpdateUserInput): Promise<Omit<User, 'password'>> {
+        const existingUser = await this.userRepository.findById(id);
+        if (!existingUser) {
+            throw new Error('User not found');
+        }
+        const user = await this.userRepository.update(id,data);
+        const {password : _password, ...safeUser} = user;
+        return safeUser;
     }
 }
