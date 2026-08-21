@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import type { UserService } from "../services/user.service";
-import type { RegisterInput, LoginInput ,UpdateUserInput,DeleteUserParams } from "../validations/user.validation";
-import { errorMonitor } from "node:events";
+import type { RegisterInput, LoginInput ,UpdateUserInput } from "../validations/user.validation";
 
 export class UserController {
     

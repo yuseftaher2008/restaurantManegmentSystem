@@ -13,5 +13,11 @@ export class CategoryRepository extends BaseRepository<Category, CategoryCreateI
         return prisma.category.create({
             data
         });
+
+    }
+    async findByName(name:string): Promise<Category | null> {
+        return prisma.category.findUnique({
+            where: {name}
+        });
     }
 }

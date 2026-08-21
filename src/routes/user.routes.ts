@@ -8,8 +8,8 @@ export function createUserRouter(userController: UserController) {
 
     router.post("/register", validate(registerSchema), (req, res) => userController.register(req, res));
     router.post("/login", validate(loginSchema), (req, res) => userController.login(req, res));
-    router.post("/update/:id",(req,res) => userController.updateUser(req,res));
-    router.delete("/:id",(req,res) => userController.deleteUser(req,res));
+    router.post("/update/:id",validate(updateUserSchema),(req,res) => userController.updateUser(req,res));
+    router.delete("/:id",validate(uuidParamsSchema,"params"),(req,res) => userController.deleteUser(req,res));
 
     return router;
 }

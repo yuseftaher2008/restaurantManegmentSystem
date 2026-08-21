@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { uuidParamsSchema } from "./common.validation";
+
+export { uuidParamsSchema };
 
 export const registerSchema = z.object({
   firstName: z
@@ -38,14 +41,9 @@ export const updateUserSchema = z.object({
     .optional(),
 });
 
-export const uuidParamsSchema = z.object({
-  id: z.string().uuid("Invalid user ID"),
-});
-
 export const deleteUserParamsSchema = uuidParamsSchema;
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
-export type UuidParams = z.infer<typeof uuidParamsSchema>;
 export type DeleteUserParams = z.infer<typeof deleteUserParamsSchema>;
