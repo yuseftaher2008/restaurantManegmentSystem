@@ -5,6 +5,14 @@ import { Category } from "../../generated/prisma/client";
 export class CategoryService {
     constructor(private categoryRepository:CategoryRepository){}
 
+    async getCategory ():Promise<Category[]>{
+        const categories = await this.categoryRepository.findAll();
+        if(!categories[0]){
+            throw new Error(`No categories yet`);
+        }
+        return categories;
+    }
+
     async createCategory (data:CategoryCreateInput):Promise<Category> {
         const existingCategory = await this.categoryRepository.findByName(data.name)
         if(existingCategory){

@@ -4,6 +4,20 @@ import { CategoryService } from "../services/category.service";
 export class CategoryController {
     constructor(private categoryService : CategoryService){}
 
+    async getCategory(req:Request,res:Response):Promise<void> {
+        try {
+            
+            const categories = await this.categoryService.getCategory();
+            res.json(categories);
+
+        } catch (error) {
+            res.status(400).json({
+                message: error instanceof Error? error.message :
+                "try again later"
+            });
+        }
+    }
+
     async createCategory(req:Request,res:Response):Promise<void> {
         try {
             const {name} = req.body;
