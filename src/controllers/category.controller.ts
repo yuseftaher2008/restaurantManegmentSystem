@@ -7,34 +7,33 @@ export class CategoryController {
 
     async getCategory(req: Request, res: Response): Promise<void> {
         try {
-            
             const categories = await this.categoryService.getCategory();
-            res.json(categories);
-
+            res.json({ message: "categories retrieved", data: categories });
         } catch (error) {
-            
             console.error("[GET CATEGORIES ERROR]", error);
-            res.status(400).json({
-                message: "try again later"
-            });
+            res.status(400).json({ message: "Failed to get categories" });
+        }
+    }
+
+    async getCategoryById(req: Request, res: Response): Promise<void> {
+        try {
+            const id = req.params.id as string;
+            const category = await this.categoryService.getById(id);
+            res.json({ message: "category retrieved", data: category });
+        } catch (error) {
+            console.error("[GET CATEGORY ERROR]", error);
+            res.status(404).json({ message: "Category not found" });
         }
     }
 
     async createCategory(req: Request, res: Response): Promise<void> {
         try {
             const { name } = req.body;
-            const createCategory = await this.categoryService.createCategory({ name });
-            res.status(201).json({
-                message: "category created",
-                createCategory
-            });
-
+            const category = await this.categoryService.createCategory({ name });
+            res.status(201).json({ message: "category created", data: category });
         } catch (error) {
-
             console.error("[CREATE CATEGORY ERROR]", error);
-            res.status(400).json({
-                message: "creating category has failed"
-            });
+            res.status(400).json({ message: "Failed to create category" });
         }
     }
 
@@ -42,34 +41,22 @@ export class CategoryController {
         try {
             const id: string = req.params.id as string;
             const data: UpdateCategoryInput = req.body;
-            const updateCategory = await this.categoryService.updateCategory(id, data);
-            res.json({
-                message: "category updated",
-                updateCategory
-            });
+            const category = await this.categoryService.updateCategory(id, data);
+            res.json({ message: "category updated", data: category });
         } catch (error) {
             console.error("[UPDATE CATEGORY ERROR]", error);
-            res.status(400).json({
-                message: "update failed"
-            })
-            
+            res.status(400).json({ message: "Failed to update category" });
         }
     }
 
-    // [M-7] Return 204 No Content instead of deleted object
     async deleteCategory(req: Request, res: Response): Promise<void> {
         try {
             const id: string = req.params.id as string;
             await this.categoryService.deleteCategory(id);
-            // [M-7] Return 204 No Content like deleteUser does
             res.status(204).send();
-            
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
             console.error("[DELETE CATEGORY ERROR]", error);
-            res.status(400).json({
-                message: "deletion failed"
-            });            
+            res.status(400).json({ message: "Failed to delete category" });
         }
     }
 }

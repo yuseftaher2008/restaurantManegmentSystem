@@ -24,14 +24,41 @@ export function createCategoryRouter(categoryController: CategoryController, aut
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Category'
-   *       400:
-   *         description: No categories yet
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                 data:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Category'
    */
   router.get("/",
     (req, res) => categoryController.getCategory(req, res)
+  );
+
+  /**
+   * @swagger
+   * /category/{id}:
+   *   get:
+   *     tags: [Category]
+   *     summary: Get category by ID
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       200:
+   *         description: Category found
+   *       404:
+   *         description: Category not found
+   */
+  router.get("/:id",
+    validate(categoryParamsSchema, "params"),
+    (req, res) => categoryController.getCategoryById(req, res)
   );
 
   /**
@@ -119,7 +146,7 @@ export function createCategoryRouter(categoryController: CategoryController, aut
    *           type: string
    *           format: uuid
    *     responses:
-   *       200:
+   *       204:
    *         description: Category deleted
    *       400:
    *         description: Deletion failed

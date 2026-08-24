@@ -10,6 +10,14 @@ export class CategoryService {
         return categories;
     }
 
+    async getById(id: string): Promise<Category> {
+        const category = await this.categoryRepository.findById(id);
+        if(!category){
+            throw new Error(`category is not found`);
+        }
+        return category;
+    }
+
     // [M-6] Handle race condition on category creation by catching unique constraint error
     async createCategory (data:CategoryCreateInput):Promise<Category> {
         const existingCategory = await this.categoryRepository.findByName(data.name)
