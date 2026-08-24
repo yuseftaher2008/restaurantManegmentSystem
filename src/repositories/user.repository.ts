@@ -1,9 +1,11 @@
 import { prisma } from "../../lib/prisma";
 import type { User } from "../../generated/prisma/client";
-import type { UserCreateInput } from "../../generated/prisma/models/User";
+// [H-6] Import UserUpdateInput type for proper typing of update operations
+import type { UserCreateInput, UserUpdateInput } from "../../generated/prisma/models/User";
 import { BaseRepository } from "./base.repository";
 
-export class UserRepository extends BaseRepository<User, UserCreateInput> {
+// [H-6] Added UserUpdateInput as third generic parameter for type-safe updates
+export class UserRepository extends BaseRepository<User, UserCreateInput, UserUpdateInput> {
     
     constructor(){
         super(prisma.user);

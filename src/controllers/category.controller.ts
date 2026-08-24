@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
-import { CategoryService } from "../services/category.service";
+import type { CategoryService } from "../services/category.service";
+import type { UpdateCategoryInput } from "../validations/category.validation";
 
 export class CategoryController {
-    constructor(private categoryService : CategoryService){}
+    constructor(private categoryService: CategoryService){}
 
-    async getCategory(req:Request,res:Response):Promise<void> {
+    async getCategory(req: Request, res: Response): Promise<void> {
         try {
             
             const categories = await this.categoryService.getCategory();
@@ -18,9 +19,9 @@ export class CategoryController {
         }
     }
 
-    async createCategory(req:Request,res:Response):Promise<void> {
+    async createCategory(req: Request, res: Response): Promise<void> {
         try {
-            const {name} = req.body;
+            const { name } = req.body;
             const createCategory = await this.categoryService.createCategory(name);
             res.status(201).json({
                 message: "category created",
@@ -35,11 +36,11 @@ export class CategoryController {
         }
     }
 
-    async updateCategory(req:Request,res:Response):Promise<void> {
+    async updateCategory(req: Request, res: Response): Promise<void> {
         try {
-            const id:string = req.params.id as string;
-            const data = req.body;
-            const updateCategory = await this.categoryService.updateCategory(id,data);
+            const id: string = req.params.id as string;
+            const data: UpdateCategoryInput = req.body;
+            const updateCategory = await this.categoryService.updateCategory(id, data);
             res.json({
                 message: "category updated",
                 updateCategory
@@ -47,25 +48,25 @@ export class CategoryController {
         } catch (error) {
             res.status(400).json({
                 message: error instanceof Error? error.message :
-                "update faield"
+                "update failed"
             })
             
         }
     }
 
-    async deleteCategory(req:Request,res:Response):Promise<void> {
+    async deleteCategory(req: Request, res: Response): Promise<void> {
         try {
-            const id:string = req.params.id as string;
+            const id: string = req.params.id as string;
             const deletedCategory = await this.categoryService.deleteCategory(id);
             res.json({
-                message:"category deleted",
+                message: "category deleted",
                 deletedCategory
             });
             
         } catch (error) {
             res.status(400).json({
-                message:error instanceof Error? error.message:
-                "deletion failde"
+                message: error instanceof Error? error.message:
+                "deletion failed"
             });            
         }
     }

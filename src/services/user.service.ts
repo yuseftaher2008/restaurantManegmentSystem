@@ -61,7 +61,28 @@ export class UserService {
         if (!existingUser) {
             throw new Error('User not found');
         }
-        const user = await this.userRepository.update(id,data);
+
+        // [C-3] Verify current password when changing password
+        if (data.password) {
+            if (!data.currentPassword) {
+                throw new Error('Current password is required when changing password');
+            }
+            const isCurrentPasswordValid = await bcrypt.compare(data.currentPassword, existingUser.password);
+            if (!isCurrentPasswordValid) {
+                throw new Error('Current password is incorrect');
+            }
+        }
+
+
+        const { currentPassword: _, ...updateData } = data;
+
+        
+        if (updateData.password) {
+            const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+            updateData.password = await bcrypt.hash(updateData.password, saltRounds);
+        }
+
+        const user = await this.userRepository.update(id, updateData);
         const {password : _password, ...safeUser} = user;
         return safeUser;
     }

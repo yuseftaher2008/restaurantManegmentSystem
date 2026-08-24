@@ -1,9 +1,11 @@
 import { prisma } from "../../lib/prisma";
 import type { Category } from "../../generated/prisma/client";
-import type { CategoryCreateInput } from "../../generated/prisma/models/Category";
+// [H-6] Import CategoryUpdateInput type for proper typing of update operations
+import type { CategoryCreateInput, CategoryUpdateInput } from "../../generated/prisma/models/Category";
 import { BaseRepository } from "./base.repository";
 
-export class CategoryRepository extends BaseRepository<Category, CategoryCreateInput> {
+// [H-6] Added CategoryUpdateInput as third generic parameter for type-safe updates
+export class CategoryRepository extends BaseRepository<Category, CategoryCreateInput, CategoryUpdateInput> {
     
     constructor(){
         super(prisma.category);
@@ -15,9 +17,9 @@ export class CategoryRepository extends BaseRepository<Category, CategoryCreateI
         });
 
     }
-    async findByName(name:string): Promise<Category | null> {
+    async findByName(name: string): Promise<Category | null> {
         return prisma.category.findUnique({
-            where: {name}
+            where: { name }
         });
     }
 }

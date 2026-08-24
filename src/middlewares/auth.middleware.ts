@@ -41,6 +41,8 @@ export class AuthMiddleware {
                 role : decoded.role
               };
 
+
+              next();
         } catch (error) {
 
             res.status(401).json({
@@ -48,7 +50,6 @@ export class AuthMiddleware {
               });
 
         }
-        next();
     }
 
 }

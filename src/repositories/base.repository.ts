@@ -6,7 +6,8 @@ type PrismaModelDelegate = {
     update(args: { where: { id: string }; data: any }): Promise<any>;
 };
 
-export abstract class BaseRepository<TModel, TCreateInput> {
+
+export abstract class BaseRepository<TModel, TCreateInput, TUpdateInput = TCreateInput> {
     
     constructor(protected model: PrismaModelDelegate) {
     }
@@ -29,7 +30,7 @@ export abstract class BaseRepository<TModel, TCreateInput> {
         });
     }
 
-    async update(id: string, data: any): Promise<TModel> {
+    async update(id: string, data: TUpdateInput): Promise<TModel> {
         return this.model.update({
             where: { id },
             data

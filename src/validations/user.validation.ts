@@ -23,23 +23,36 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const updateUserSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, "First name must be at least 2 characters")
-    .max(25, "First name must be at most 25 characters")
-    .optional(),
-  lastName: z
-    .string()
-    .min(2, "Last name must be at least 2 characters")
-    .max(25, "Last name must be at most 25 characters")
-    .optional(),
-  email: z.string().email("Invalid email address").optional(),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .optional(),
-});
+
+export const updateUserSchema = z
+  .object({
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters")
+      .max(25, "First name must be at most 25 characters")
+      .optional(),
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters")
+      .max(25, "Last name must be at most 25 characters")
+      .optional(),
+    email: z.string().email("Invalid email address").optional(),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .optional(),
+    currentPassword: z.string().min(1, "Current password is required").optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.password && !data.currentPassword) return false;
+      return true;
+    },
+    {
+      message: "Current password is required when changing password",
+      path: ["currentPassword"],
+    }
+  );
 
 export const deleteUserParamsSchema = uuidParamsSchema;
 

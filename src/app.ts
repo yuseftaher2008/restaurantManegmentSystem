@@ -1,5 +1,8 @@
 import express from "express";
 import type { Express } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { validateEnv } from "./config/env";
 import { Role } from "../generated/prisma/enums";
 import { UserRepository } from "./repositories/user.repository";
@@ -12,6 +15,8 @@ import { CategoryController } from "./controllers/category.controller";
 import { createCategoryRouter } from "./routes/category.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
+
+import { errorHandler } from "./middlewares/errorHandler";
 
 
 validateEnv();
@@ -36,15 +41,35 @@ const categoryAuthorization = new AuthorizationMiddleware([
     Role.STAFF
 ]);
 
+
+app.use(helmet());
+
+app.use(cors());
+
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: "Too many attempts, please try again later" }
+});
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: "Too many requests, please try again later" }
+});
+
 // Middleware
 app.use(express.json({ limit: "20kb" }));
+app.use(generalLimiter);
 
 // Routes
 app.use("/api/user",
      createUserRouter(
         userController,
         authMiddleware,
-        adminAuthorization
+        adminAuthorization,
+        authLimiter
     )
 );
 app.use(
@@ -55,5 +80,8 @@ app.use(
         categoryAuthorization
     )
 );
+
+
+app.use(errorHandler);
 
 export default app;

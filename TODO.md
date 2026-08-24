@@ -7,29 +7,29 @@
 
 ## CRITICAL
 
-- [ ] **C-1: Add JWT authentication middleware**
+- [x] **C-1: Add JWT authentication middleware**
   - File: `src/middlewares/` (new file)
   - Create `auth.middleware.ts` that verifies JWT token from `Authorization: Bearer <token>` header
   - Attach decoded user (`id`, `email`, `role`) to `req.user`
   - Apply to all protected routes (everything except login/register)
 
-- [ ] **C-2: Add role-based authorization middleware**
+- [x] **C-2: Add role-based authorization middleware**
   - File: `src/middlewares/` (new file)
   - Create `authorize.middleware.ts` that accepts allowed roles as parameter
   - Example: `authorize(Role.ADMIN, Role.STAFF)`
   - Apply to category rouDMINtes (A/STAFF only) and user delete (ADMIN only)
 
-- [ ] **C-3: Require re-authentication for password change**
+- [x] **C-3: Require re-authentication for password change**
   - File: `src/controllers/user.controller.ts:39-55`
   - Add `currentPassword` field to `updateUserSchema` when `password` is provided
   - Verify `currentPassword` against stored hash before allowing update
 
-- [ ] **C-4: Audit git history for `.env` leaks**
+- [x] **C-4: Audit git history for `.env` leaks**
   - Run `git log --all --full-history -- .env` to check if `.env` was ever committed
   - If yes: rotate `JWT_SECRET` and database password immediately
   - Ensure `.env` is in `.gitignore` (already confirmed)
 
-- [ ] **C-5: Verify `generated/prisma` exists**
+- [x] **C-5: Verify `generated/prisma` exists**
   - Run `npx prisma generate` to ensure Prisma client types are generated
   - Verify `src/services/category.service.ts:2-3` imports resolve correctly
 
@@ -37,51 +37,51 @@
 
 ## HIGH
 
-- [ ] **H-1: Add CORS middleware**
+- [x] **H-1: Add CORS middleware**
   - File: `src/app.ts`
   - Install: `npm install cors @types/cors`
   - Configure with appropriate origins for frontend
 
-- [ ] **H-2: Add global error handling middleware**
+- [x] **H-2: Add global error handling middleware**
   - File: `src/middlewares/` (new file)
   - Create `errorHandler.middleware.ts` with Express error middleware signature `(err, req, res, next)`
   - Catch unhandled errors, log them, return generic 500 response
   - Register in `src/app.ts` after all routes
 
-- [ ] **H-3: Add rate limiting**
+- [x] **H-3: Add rate limiting**
   - File: `src/app.ts`
   - Install: `npm install express-rate-limit`
   - Apply stricter limit on login/register (e.g., 5 req/15min)
   - Apply general limit on all routes (e.g., 100 req/15min)
 
-- [ ] **H-4: Add `helmet` security headers**
+- [x] **H-4: Add `helmet` security headers**
   - File: `src/app.ts`
   - Install: `npm install helmet @types/helmet`
   - Add `app.use(helmet())` before other middleware
 
-- [ ] **H-5: Hash password on update**
+- [x] **H-5: Hash password on update**
   - File: `src/services/user.service.ts:59-67`
   - `userUpdate()` passes plaintext password to repository
   - Add: `if (data.password) { data.password = await bcrypt.hash(data.password, saltRounds); }`
 
-- [ ] **H-6: Fix BaseRepository `update` type**
+- [x] **H-6: Fix BaseRepository `update` type**
   - File: `src/repositories/base.repository.ts:32`
   - Change `data: any` to `data: Prisma.InputJsonValue` or make it generic
   - Prevents mass-assignment of unexpected fields
 
-- [ ] **H-7: Type controller request data**
+- [x] **H-7: Type controller request data**
   - File: `src/controllers/category.controller.ts:27`
   - Change `const data = req.body` to use typed validated data
   - Import and use `UpdateCategoryInput` type
 
-- [ ] **H-8: Fix HTTP methods for REST conventions**
+- [x] **H-8: Fix HTTP methods for REST conventions**
   - File: `src/routes/user.routes.ts:11`
     - Change `POST /update/:id` to `PATCH /:id`
   - File: `src/routes/category.routes.ts`
     - Change `POST /update/:id` to `PATCH /:id`
     - Change `POST /create` to `POST /` (POST implies creation)
 
-- [ ] **H-9: Validate UUID param on user update**
+- [x] **H-9: Validate UUID param on user update**
   - File: `src/routes/user.routes.ts:11`
   - Add `validate(uuidParamsSchema, "params")` to the update route
   - Currently only validates body, not the `:id` param
@@ -135,7 +135,7 @@
   - File: `src/controllers/category.controller.ts:2`
   - Change `import { CategoryService }` to `import type { CategoryService }`
 
-- [ ] **M-10: Remove BaseRepository `create` override in subclasses**
+- [ ] **M-10: Remove BaseRepository** `create` **override in subclass4es**
   - File: `src/repositories/user.repository.ts:12-16`, `category.repository.ts:12-16`
   - Use base class `create()` method instead of overriding
   - Or make base `create()` non-abstract and pass prisma model
