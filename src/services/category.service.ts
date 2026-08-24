@@ -13,13 +13,22 @@ export class CategoryService {
         return categories;
     }
 
+    // [M-6] Handle race condition on category creation by catching unique constraint error
     async createCategory (data:CategoryCreateInput):Promise<Category> {
         const existingCategory = await this.categoryRepository.findByName(data.name)
         if(existingCategory){
             throw new Error(`category already exists`);
         }
-        const createdCategory = await this.categoryRepository.create(data);
-        return createdCategory;
+        try {
+            const createdCategory = await this.categoryRepository.create(data);
+            return createdCategory;
+        } catch (error) {
+            // [M-6] Catch Prisma unique constraint violation (P2002)
+            if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
+                throw new Error(`category already exists`);
+            }
+            throw error;
+        }
     }
     
     async updateCategory (id:string,data:CategoryUpdateInput):Promise<Category> {

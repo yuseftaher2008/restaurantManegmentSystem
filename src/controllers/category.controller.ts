@@ -12,9 +12,10 @@ export class CategoryController {
             res.json(categories);
 
         } catch (error) {
+            
+            console.error("[GET CATEGORIES ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error? error.message :
-                "try again later"
+                message: "try again later"
             });
         }
     }
@@ -29,9 +30,10 @@ export class CategoryController {
             });
 
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[CREATE CATEGORY ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error? error.message : 
-                "creating category has failed"
+                message: "creating category has failed"
             });
         }
     }
@@ -46,27 +48,28 @@ export class CategoryController {
                 updateCategory
             });
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[UPDATE CATEGORY ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error? error.message :
-                "update failed"
+                message: "update failed"
             })
             
         }
     }
 
+    // [M-7] Return 204 No Content instead of deleted object
     async deleteCategory(req: Request, res: Response): Promise<void> {
         try {
             const id: string = req.params.id as string;
-            const deletedCategory = await this.categoryService.deleteCategory(id);
-            res.json({
-                message: "category deleted",
-                deletedCategory
-            });
+            await this.categoryService.deleteCategory(id);
+            // [M-7] Return 204 No Content like deleteUser does
+            res.status(204).send();
             
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[DELETE CATEGORY ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error? error.message:
-                "deletion failed"
+                message: "deletion failed"
             });            
         }
     }

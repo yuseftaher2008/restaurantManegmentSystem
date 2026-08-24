@@ -15,8 +15,10 @@ export class UserController {
                 user
             });
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[REGISTER ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error ? error.message : "Registration failed"
+                message: "Registration failed"
             });
         }
     }
@@ -30,8 +32,10 @@ export class UserController {
                 token
             });
         } catch (error) {
+
+            console.error("[LOGIN ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error ? error.message : "login failed"
+                message: "login failed"
             });
         }
     }
@@ -47,8 +51,10 @@ export class UserController {
                 user
             });
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[UPDATE ERROR]", error);
             res.status(400).json({
-                message: error instanceof Error ? error.message : "Update failed"
+                message: "Update failed"
             });
             
         }
@@ -62,9 +68,10 @@ export class UserController {
             res.status(204).send();
             
         } catch (error) {
+            // [M-11] Log error server-side, return generic message to client
+            console.error("[DELETE ERROR]", error);
             res.status(400).json({
-                message : error instanceof Error ? error.message : 
-                "user delete failed"
+                message: "user delete failed"
             });
         } 
     }

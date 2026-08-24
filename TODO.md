@@ -90,67 +90,67 @@
 
 ## MEDIUM
 
-- [ ] **M-1: Add logging infrastructure**
+- [x] **M-1: Add logging infrastructure**
   - Install: `npm install morgan @types/morgan` (or `pino`)
   - Add request logging middleware in `src/app.ts`
   - Log errors in controllers (not just returning to client)
 
-- [ ] **M-2: Add graceful shutdown handling**
+- [x] **M-2: Add graceful shutdown handling**
   - File: `src/server.ts`
   - Listen for `SIGTERM` and `SIGINT` signals
   - Call `prisma.$disconnect()` before process exit
   - Close server gracefully
 
-- [ ] **M-3: Move bcrypt config to env.ts**
+- [x] **M-3: Move bcrypt config to env.ts**
   - File: `src/services/user.service.ts:16`
   - `Number(process.env.BCRYPT_SALT_ROUNDS)` is read at runtime inside service
   - Read once in `src/config/env.ts` and export as config constant
 
-- [ ] **M-4: Add null check for JWT_SECRET**
+- [x] **M-4: Add null check for JWT_SECRET**
   - File: `src/services/user.service.ts:44`
   - Replace `process.env.JWT_SECRET as string` with validated config value
   - Use value from `env.ts` validator instead of raw `process.env`
 
-- [ ] **M-5: Normalize email before validation**
+- [x] **M-5: Normalize email before validation**
   - File: `src/validations/user.validation.ts`
   - Add `.toLowerCase()` transform to email fields in `registerSchema` and `loginSchema`
   - Prevents duplicate accounts with different casing
 
-- [ ] **M-6: Handle race condition on category creation**
+- [x] **M-6: Handle race condition on category creation**
   - File: `src/services/category.service.ts:8-15`
   - Use Prisma `upsert` or wrap in a transaction
   - Or catch Prisma unique constraint error and return friendly message
 
-- [ ] **M-7: Don't return deleted object**
+- [x] **M-7: Don't return deleted object**
   - File: `src/controllers/category.controller.ts:45-48`
   - Change to return `204 No Content` like `deleteUser` does
   - Remove `deletedCategory` from response body
 
-- [ ] **M-8: Move `validateEnv()` to server.ts**
+- [x] **M-8: Move `validateEnv()` to server.ts**
   - File: `src/app.ts:13`
   - Currently runs at import time (side effect)
   - Move to `src/server.ts` before `app.listen()`
 
-- [ ] **M-9: Use `import type` for CategoryService**
+- [x] **M-9: Use `import type` for CategoryService**
   - File: `src/controllers/category.controller.ts:2`
   - Change `import { CategoryService }` to `import type { CategoryService }`
 
-- [ ] **M-10: Remove BaseRepository** `create` **override in subclass4es**
+- [x] **M-10: Remove BaseRepository** `create` **override in subclass4es**
   - File: `src/repositories/user.repository.ts:12-16`, `category.repository.ts:12-16`
   - Use base class `create()` method instead of overriding
   - Or make base `create()` non-abstract and pass prisma model
 
-- [ ] **M-11: Sanitize error messages before sending to client**
+- [x] **M-11: Sanitize error messages before sending to client**
   - Files: All controllers
   - Don't pass raw `error.message` to response
   - Log full error server-side, return generic message to client
 
-- [ ] **M-12: Add request ID tracking**
+- [x] **M-12: Add request ID tracking**
   - Install: `npm install uuid @types/uuid` (or use `crypto.randomUUID`)
   - Add middleware that assigns unique ID to each request
   - Include in logs and error responses for traceability
 
-- [ ] **M-13: Disconnect Prisma on process exit**
+- [x] **M-13: Disconnect Prisma on process exit**
   - File: `lib/prisma.ts`
   - Export `prisma.$disconnect()` function
   - Call it in graceful shutdown handler (see M-2)

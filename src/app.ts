@@ -3,9 +3,11 @@ import type { Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+// [M-1] Added morgan for request logging
+import morgan from "morgan";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { validateEnv } from "./config/env";
+import { validateEnv, BCRYPT_SALT_ROUNDS, JWT_SECRET } from "./config/env";
 import swaggerOptions from "./config/swagger";
 import { Role } from "../generated/prisma/enums";
 import { UserRepository } from "./repositories/user.repository";
@@ -18,11 +20,13 @@ import { CategoryController } from "./controllers/category.controller";
 import { createCategoryRouter } from "./routes/category.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
+// [M-12] Import request ID tracking middleware
+import { requestId } from "./middlewares/requestId";
 
 import { errorHandler } from "./middlewares/errorHandler";
 
 
-validateEnv();
+// [M-8] Removed validateEnv() call from here - moved to server.ts
 
 const app: Express = express();
 
@@ -35,7 +39,8 @@ const categoryRepository = new CategoryRepository();
 const categoryService = new CategoryService(categoryRepository);
 const categoryController = new CategoryController(categoryService);
 
-const authMiddleware = new AuthMiddleware(process.env.JWT_SECRET!);
+// [M-4] Use imported constant instead of process.env
+const authMiddleware = new AuthMiddleware(JWT_SECRET);
 const adminAuthorization = new AuthorizationMiddleware([
   Role.ADMIN,
 ]);
@@ -45,9 +50,15 @@ const categoryAuthorization = new AuthorizationMiddleware([
 ]);
 
 
+// [M-12] Add request ID tracking before other middleware
+app.use(requestId);
+
 app.use(helmet());
 
 app.use(cors());
+
+// [M-1] Added morgan for request logging
+app.use(morgan("combined"));
 
 
 const authLimiter = rateLimit({

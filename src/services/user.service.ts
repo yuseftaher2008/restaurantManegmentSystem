@@ -3,6 +3,8 @@ import type { User } from "../../generated/prisma/client";
 import type { RegisterInput, LoginInput, UpdateUserInput } from "../validations/user.validation";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+// [M-3, M-4] Import validated env constants instead of using process.env directly
+import { BCRYPT_SALT_ROUNDS, JWT_SECRET } from "../config/env";
 
 export class UserService {
     constructor(private userRepository: UserRepository) {}
@@ -13,7 +15,8 @@ export class UserService {
             throw new Error(`Registration failed`);
         }
 
-        const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+        // [M-3] Use imported constant instead of process.env
+        const saltRounds = BCRYPT_SALT_ROUNDS;
         const hashedPassword: string = await bcrypt.hash(data.password, saltRounds);
 
         const user = await this.userRepository.create({
@@ -41,7 +44,8 @@ export class UserService {
 
         const token = jwt.sign(
             { id: existingUser.id, email: existingUser.email, role: existingUser.role },
-            process.env.JWT_SECRET as string,
+            // [M-4] Use imported constant instead of process.env
+            JWT_SECRET,
             { expiresIn: '7d' }
         );
 
@@ -78,7 +82,8 @@ export class UserService {
 
         
         if (updateData.password) {
-            const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+        // [M-3] Use imported constant instead of process.env
+        const saltRounds = BCRYPT_SALT_ROUNDS;
             updateData.password = await bcrypt.hash(updateData.password, saltRounds);
         }
 

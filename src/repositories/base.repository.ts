@@ -7,6 +7,7 @@ type PrismaModelDelegate = {
 };
 
 
+
 export abstract class BaseRepository<TModel, TCreateInput, TUpdateInput = TCreateInput> {
     
     constructor(protected model: PrismaModelDelegate) {
@@ -22,7 +23,12 @@ export abstract class BaseRepository<TModel, TCreateInput, TUpdateInput = TCreat
         return this.model.findMany();
     }
 
-    abstract create(data: TCreateInput): Promise<TModel>;
+
+    async create(data: TCreateInput): Promise<TModel> {
+        return this.model.create({
+            data
+        });
+    }
 
     async delete(id: string): Promise<TModel> {
         return this.model.delete({
