@@ -7,27 +7,27 @@
 
 ## Phase 1 — Fix Existing Bugs
 
-- [ ] **BUG-1: Add authMiddleware to DELETE /api/user/:id**
+- [x] **BUG-1: Add authMiddleware to DELETE /api/user/:id**
   - File: `src/routes/user.routes.ts:142`
   - `authorizeMiddleware` checks `req.user` but `authMiddleware` is not applied first
   - Add `authMiddleware.handle` before `authorizationMiddleware.handle`
 
-- [ ] **BUG-2: Fix GET /api/category returning 400 when empty**
+- [x] **BUG-2: Fix GET /api/category returning 400 when empty**
   - File: `src/services/category.service.ts:10-11`
   - Currently throws `"No categories yet"` and returns 400
   - Change to return 200 with `[]` when no categories exist
 
-- [ ] **BUG-3: Fix POST /api/category passing string instead of object**
+- [x] **BUG-3: Fix POST /api/category passing string instead of object**
   - File: `src/controllers/category.controller.ts:25-26`
   - `createCategory(name)` passes a plain string, but service expects `CategoryCreateInput` (`{ name }`)
   - Fix: pass `{ name }` object
 
-- [ ] **BUG-4: Add ownership check to PATCH /api/user/:id**
+- [x] **BUG-4: Add ownership check to PATCH /api/user/:id**
   - File: `src/controllers/user.controller.ts:43-61`
   - Any authenticated user can update any user by specifying a different `:id`
   - Add check: `req.user.id === req.params.id` unless caller is ADMIN
 
-- [ ] **BUG-5: Fix Swagger enum — USER → CUSTOMER**
+- [x] **BUG-5: Fix Swagger enum — USER → CUSTOMER**
   - File: `src/config/swagger.ts`
   - Role enum lists `USER` but actual enum value is `CUSTOMER`
 

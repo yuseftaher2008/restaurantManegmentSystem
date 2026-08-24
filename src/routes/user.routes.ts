@@ -139,7 +139,7 @@ export function createUserRouter(userController: UserController, authMiddleware:
      *       400:
      *         description: Delete failed
      */
-    router.delete("/:id", validate(uuidParamsSchema, "params"), authorizationMiddleware.handle, (req, res) => userController.deleteUser(req, res));
+    router.delete("/:id", validate(uuidParamsSchema, "params"), authMiddleware.handle, authorizationMiddleware.handle, (req, res) => userController.deleteUser(req, res));
 
     return router;
 }

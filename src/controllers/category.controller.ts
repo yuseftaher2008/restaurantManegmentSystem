@@ -23,14 +23,14 @@ export class CategoryController {
     async createCategory(req: Request, res: Response): Promise<void> {
         try {
             const { name } = req.body;
-            const createCategory = await this.categoryService.createCategory(name);
+            const createCategory = await this.categoryService.createCategory({ name });
             res.status(201).json({
                 message: "category created",
                 createCategory
             });
 
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
+
             console.error("[CREATE CATEGORY ERROR]", error);
             res.status(400).json({
                 message: "creating category has failed"
@@ -48,7 +48,6 @@ export class CategoryController {
                 updateCategory
             });
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
             console.error("[UPDATE CATEGORY ERROR]", error);
             res.status(400).json({
                 message: "update failed"

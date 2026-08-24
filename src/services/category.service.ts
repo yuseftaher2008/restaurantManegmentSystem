@@ -7,9 +7,6 @@ export class CategoryService {
 
     async getCategory ():Promise<Category[]>{
         const categories = await this.categoryRepository.findAll();
-        if(!categories[0]){
-            throw new Error(`No categories yet`);
-        }
         return categories;
     }
 
@@ -23,7 +20,7 @@ export class CategoryService {
             const createdCategory = await this.categoryRepository.create(data);
             return createdCategory;
         } catch (error) {
-            // [M-6] Catch Prisma unique constraint violation (P2002)
+
             if (error instanceof Error && 'code' in error && (error as any).code === 'P2002') {
                 throw new Error(`category already exists`);
             }

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { UserService } from "../services/user.service";
 import type { RegisterInput, LoginInput ,UpdateUserInput } from "../validations/user.validation";
+import { Role } from "../../generated/prisma/enums";
 
 export class UserController {
     
@@ -15,7 +16,7 @@ export class UserController {
                 user
             });
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
+
             console.error("[REGISTER ERROR]", error);
             res.status(400).json({
                 message: "Registration failed"
@@ -40,23 +41,31 @@ export class UserController {
         }
     }
 
-    async updateUser(req:Request,res: Response): Promise<void> {
-        
+    // [BUG-4] Added ownership check - users can only update their own profile unless ADMIN
+    async updateUser(req: Request, res: Response): Promise<void> {
         try {
             const id = req.params.id as string;
-            const data : UpdateUserInput = req.body;
-            const user = await this.userService.update(id , data);
+            const data: UpdateUserInput = req.body;
+            
+
+            if (req.user?.id !== id && req.user?.role !== Role.ADMIN) {
+                res.status(403).json({
+                    message: "You can only update your own profile"
+                });
+                return;
+            }
+            
+            const user = await this.userService.update(id, data);
             res.json({
                 message: "user updated",
                 user
             });
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
+
             console.error("[UPDATE ERROR]", error);
             res.status(400).json({
                 message: "Update failed"
             });
-            
         }
     }
 
@@ -68,7 +77,7 @@ export class UserController {
             res.status(204).send();
             
         } catch (error) {
-            // [M-11] Log error server-side, return generic message to client
+
             console.error("[DELETE ERROR]", error);
             res.status(400).json({
                 message: "user delete failed"

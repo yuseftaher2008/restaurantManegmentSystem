@@ -30,7 +30,7 @@ const swaggerOptions: Options = {
             firstName: { type: "string" },
             lastName: { type: "string" },
             email: { type: "string", format: "email" },
-            role: { type: "string", enum: ["ADMIN", "STAFF", "USER"] },
+            role: { type: "string", enum: ["ADMIN", "STAFF", "CUSTOMER"] },
           },
         },
         Category: {
