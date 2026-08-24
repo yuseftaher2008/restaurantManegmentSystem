@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 export class UserService {
     constructor(private userRepository: UserRepository) {}
 
-    async userRegister(data: RegisterInput): Promise<Omit<User, 'password'>> {
+    async register(data: RegisterInput): Promise<Omit<User, 'password'>> {
         const existingUser = await this.userRepository.findByEmail(data.email);
         if (existingUser) {
             throw new Error(`Registration failed`);
@@ -28,7 +28,7 @@ export class UserService {
         return safeUser;
     }
 
-    async userLogin(data: LoginInput): Promise<string> {
+    async login(data: LoginInput): Promise<string> {
         const existingUser = await this.userRepository.findByEmail(data.email);
         if (!existingUser) {
             throw new Error('Invalid credentials');
@@ -48,7 +48,7 @@ export class UserService {
         return token;
     }
 
-    async userDelete(id: string): Promise<void> {
+    async delete(id: string): Promise<void> {
         const existingUser = await this.userRepository.findById(id);
         if (!existingUser) {
             throw new Error('User not found');
@@ -56,7 +56,7 @@ export class UserService {
         await this.userRepository.delete(id);
     }
 
-    async userUpdate(id: string, data: UpdateUserInput): Promise<Omit<User, 'password'>> {
+    async update(id: string, data: UpdateUserInput): Promise<Omit<User, 'password'>> {
         const existingUser = await this.userRepository.findById(id);
         if (!existingUser) {
             throw new Error('User not found');

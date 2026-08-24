@@ -3,7 +3,10 @@ import type { Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import { validateEnv } from "./config/env";
+import swaggerOptions from "./config/swagger";
 import { Role } from "../generated/prisma/enums";
 import { UserRepository } from "./repositories/user.repository";
 import { UserService } from "./services/user.service";
@@ -59,11 +62,20 @@ const generalLimiter = rateLimit({
   message: { message: "Too many requests, please try again later" }
 });
 
-// Middleware
+
 app.use(express.json({ limit: "20kb" }));
 app.use(generalLimiter);
 
-// Routes
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
+
 app.use("/api/user",
      createUserRouter(
         userController,

@@ -2,9 +2,11 @@
   "name": "restaurantManagementSystem",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "dev": "npx tsx src/server.ts"
+    "dev": "npx tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "prisma:generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +27,8 @@
     "@prisma/client": "^7.9.1",
     "@types/cors": "^2.8.19",
     "@types/helmet": "^0.0.48",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -33,6 +37,8 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.4.3"
   }
 }

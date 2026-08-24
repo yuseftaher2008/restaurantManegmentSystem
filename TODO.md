@@ -159,58 +159,58 @@
 
 ## LOW
 
-- [ ] **L-1: Fix typos in error messages**
+- [x] **L-1: Fix typos in error messages**
   - `src/controllers/user.controller.ts:51`: `massege` → `message`
   - `src/controllers/user.controller.ts:67`: `faield` → `failed`
   - `src/controllers/category.controller.ts:36`: `faield` → `failed`
   - `src/controllers/category.controller.ts:54`: `failde` → `failed`
 
-- [ ] **L-2: Standardize naming conventions**
+- [x] **L-2: Standardize naming conventions**
   - Service methods: use consistent pattern (e.g., all `create`/`update`/`delete` or all prefixed)
   - Route variables: `route` vs `router` — pick one
   - Route paths: decide on `/create` vs bare `/` pattern
 
-- [ ] **L-3: Add `dotenv` import to app.ts**
+- [x] **L-3: Add `dotenv` import to app.ts**
   - File: `src/app.ts`
   - Add `import "dotenv/config"` at top to ensure env vars are loaded
 
-- [ ] **L-4: Add missing npm scripts**
+- [x] **L-4: Add missing npm scripts**
   - File: `package.json`
   - Add `"start": "node dist/server.js"`
   - Add `"build": "tsc"`
   - Add `"prisma:generate": "prisma generate"`
 
-- [ ] **L-5: Fix `main` field in package.json**
+- [x] **L-5: Fix `main` field in package.json**
   - File: `package.json:5`
   - Change `"main": "index.js"` to `"main": "src/server.ts"` or remove it
 
-- [ ] **L-6: Add input sanitization for XSS**
+- [x] **L-6: Add input sanitization for XSS**
   - Install: `npm install sanitizer` or use Zod `.transform()` to strip HTML tags
   - Apply to user names and category names
 
-- [ ] **L-7: Add health check endpoint**
+- [x] **L-7: Add health check endpoint**
   - File: `src/app.ts`
   - Add `GET /health` that returns `200 OK` with `{ status: "ok" }`
   - Useful for load balancers and monitoring
 
-- [ ] **L-8: Fix inconsistent route patterns**
+- [x] **L-8: Fix inconsistent route patterns**
   - User routes: `/register`, `/login`, `/update/:id`, `/:id`
   - Category routes: `/create`, `/update/:id`, `/delete/:id`
   - Align to same pattern (e.g., all use `/:id` for resources)
 
-- [ ] **L-9: Fix category delete controller param**
+- [x] **L-9: Fix category delete controller param**
   - File: `src/controllers/category.controller.ts:44`
   - Already fixed to `req.params.id` but verify service accepts `id` not `name`
 
-- [ ] **L-10: Add API documentation**
+- [x] **L-10: Add API documentation**
   - Install: `npm install swagger-jsdoc swagger-ui-express @types/swagger-jsdoc @types/swagger-ui-express`
   - Add OpenAPI/Swagger spec for all endpoints
 
-- [ ] **L-11: Verify dotenv version**
+- [x] **L-11: Verify dotenv version**
   - File: `package.json:27`
   - `dotenv: ^17.4.2` may not exist, verify and update to latest stable
 
-- [ ] **L-12: Add `.env.example`**
+- [x] **L-12: Add `.env.example`**
   - Create `.env.example` with placeholder values
   - Document all required environment variables
   - Helps new developers set up the project

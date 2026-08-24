@@ -3,15 +3,20 @@ import { uuidParamsSchema } from "./common.validation";
 
 export { uuidParamsSchema };
 
+// Helper to strip HTML tags for XSS prevention
+const stripHtml = (val: string) => val.replace(/<[^>]*>/g, "").trim();
+
 export const registerSchema = z.object({
   firstName: z
     .string()
     .min(2, "First name must be at least 2 characters")
-    .max(25, "First name must be at most 25 characters"),
+    .max(25, "First name must be at most 25 characters")
+    .transform(stripHtml),
   lastName: z
     .string()
     .min(2, "Last name must be at least 2 characters")
-    .max(25, "Last name must be at most 25 characters"),
+    .max(25, "Last name must be at most 25 characters")
+    .transform(stripHtml),
   email: z.string().email("Invalid email address"),
   password: z
     .string()
@@ -30,12 +35,14 @@ export const updateUserSchema = z
       .string()
       .min(2, "First name must be at least 2 characters")
       .max(25, "First name must be at most 25 characters")
-      .optional(),
+      .optional()
+      .transform((val) => (val ? stripHtml(val) : val)),
     lastName: z
       .string()
       .min(2, "Last name must be at least 2 characters")
       .max(25, "Last name must be at most 25 characters")
-      .optional(),
+      .optional()
+      .transform((val) => (val ? stripHtml(val) : val)),
     email: z.string().email("Invalid email address").optional(),
     password: z
       .string()
