@@ -306,12 +306,14 @@
 
 ## Phase 8 — User Admin Enhancements
 
-- [ ] **GET /api/user/** — admin only, list all users with pagination
-- [ ] **GET /api/user/:id** — admin only, get user by ID
-- [ ] **GET /api/user/profile** — auth required, get own profile
-- [ ] **PATCH /api/user/:id/role** — admin only, change user role
+- [x] **GET /api/user/profile** — auth required, get own profile (ID from JWT)
+- [x] **PATCH /api/user/profile** — auth required, update own profile (ID from JWT)
+- [x] **DELETE /api/user/profile** — auth required, delete own account (ID from JWT)
+- [x] **GET /api/user/:id** — admin only, get user by ID
+- [x] **PATCH /api/user/:id** — admin only, update user by ID
+- [x] **DELETE /api/user/:id** — admin only, delete user by ID
+- [x] **GET /api/user/** — admin only, list all users
 - [ ] Add pagination support to list endpoints (query params: `page`, `limit`)
-- [ ] Add `adminOnly` helper that chains `authMiddleware` + `adminAuthorization`
 
 ---
 
