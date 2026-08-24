@@ -1,227 +1,361 @@
-# Code Review - Issues to Fix
+# Restaurant Management System — TODO
 
-> Generated from full codebase review on 2026-08-21
-> 39 issues total: 5 Critical, 9 High, 13 Medium, 12 Low
-
----
-
-## CRITICAL
-
-- [x] **C-1: Add JWT authentication middleware**
-  - File: `src/middlewares/` (new file)
-  - Create `auth.middleware.ts` that verifies JWT token from `Authorization: Bearer <token>` header
-  - Attach decoded user (`id`, `email`, `role`) to `req.user`
-  - Apply to all protected routes (everything except login/register)
-
-- [x] **C-2: Add role-based authorization middleware**
-  - File: `src/middlewares/` (new file)
-  - Create `authorize.middleware.ts` that accepts allowed roles as parameter
-  - Example: `authorize(Role.ADMIN, Role.STAFF)`
-  - Apply to category rouDMINtes (A/STAFF only) and user delete (ADMIN only)
-
-- [x] **C-3: Require re-authentication for password change**
-  - File: `src/controllers/user.controller.ts:39-55`
-  - Add `currentPassword` field to `updateUserSchema` when `password` is provided
-  - Verify `currentPassword` against stored hash before allowing update
-
-- [x] **C-4: Audit git history for `.env` leaks**
-  - Run `git log --all --full-history -- .env` to check if `.env` was ever committed
-  - If yes: rotate `JWT_SECRET` and database password immediately
-  - Ensure `.env` is in `.gitignore` (already confirmed)
-
-- [x] **C-5: Verify `generated/prisma` exists**
-  - Run `npx prisma generate` to ensure Prisma client types are generated
-  - Verify `src/services/category.service.ts:2-3` imports resolve correctly
+> Full feature roadmap after initial codebase review
+> Last updated: 2026-08-24
 
 ---
 
-## HIGH
+## Phase 1 — Fix Existing Bugs
 
-- [x] **H-1: Add CORS middleware**
-  - File: `src/app.ts`
-  - Install: `npm install cors @types/cors`
-  - Configure with appropriate origins for frontend
+- [ ] **BUG-1: Add authMiddleware to DELETE /api/user/:id**
+  - File: `src/routes/user.routes.ts:142`
+  - `authorizeMiddleware` checks `req.user` but `authMiddleware` is not applied first
+  - Add `authMiddleware.handle` before `authorizationMiddleware.handle`
 
-- [x] **H-2: Add global error handling middleware**
-  - File: `src/middlewares/` (new file)
-  - Create `errorHandler.middleware.ts` with Express error middleware signature `(err, req, res, next)`
-  - Catch unhandled errors, log them, return generic 500 response
-  - Register in `src/app.ts` after all routes
+- [ ] **BUG-2: Fix GET /api/category returning 400 when empty**
+  - File: `src/services/category.service.ts:10-11`
+  - Currently throws `"No categories yet"` and returns 400
+  - Change to return 200 with `[]` when no categories exist
 
-- [x] **H-3: Add rate limiting**
-  - File: `src/app.ts`
-  - Install: `npm install express-rate-limit`
-  - Apply stricter limit on login/register (e.g., 5 req/15min)
-  - Apply general limit on all routes (e.g., 100 req/15min)
+- [ ] **BUG-3: Fix POST /api/category passing string instead of object**
+  - File: `src/controllers/category.controller.ts:25-26`
+  - `createCategory(name)` passes a plain string, but service expects `CategoryCreateInput` (`{ name }`)
+  - Fix: pass `{ name }` object
 
-- [x] **H-4: Add `helmet` security headers**
-  - File: `src/app.ts`
-  - Install: `npm install helmet @types/helmet`
-  - Add `app.use(helmet())` before other middleware
+- [ ] **BUG-4: Add ownership check to PATCH /api/user/:id**
+  - File: `src/controllers/user.controller.ts:43-61`
+  - Any authenticated user can update any user by specifying a different `:id`
+  - Add check: `req.user.id === req.params.id` unless caller is ADMIN
 
-- [x] **H-5: Hash password on update**
-  - File: `src/services/user.service.ts:59-67`
-  - `userUpdate()` passes plaintext password to repository
-  - Add: `if (data.password) { data.password = await bcrypt.hash(data.password, saltRounds); }`
-
-- [x] **H-6: Fix BaseRepository `update` type**
-  - File: `src/repositories/base.repository.ts:32`
-  - Change `data: any` to `data: Prisma.InputJsonValue` or make it generic
-  - Prevents mass-assignment of unexpected fields
-
-- [x] **H-7: Type controller request data**
-  - File: `src/controllers/category.controller.ts:27`
-  - Change `const data = req.body` to use typed validated data
-  - Import and use `UpdateCategoryInput` type
-
-- [x] **H-8: Fix HTTP methods for REST conventions**
-  - File: `src/routes/user.routes.ts:11`
-    - Change `POST /update/:id` to `PATCH /:id`
-  - File: `src/routes/category.routes.ts`
-    - Change `POST /update/:id` to `PATCH /:id`
-    - Change `POST /create` to `POST /` (POST implies creation)
-
-- [x] **H-9: Validate UUID param on user update**
-  - File: `src/routes/user.routes.ts:11`
-  - Add `validate(uuidParamsSchema, "params")` to the update route
-  - Currently only validates body, not the `:id` param
+- [ ] **BUG-5: Fix Swagger enum — USER → CUSTOMER**
+  - File: `src/config/swagger.ts`
+  - Role enum lists `USER` but actual enum value is `CUSTOMER`
 
 ---
 
-## MEDIUM
+## Phase 2 — Menu Item CRUD
 
-- [x] **M-1: Add logging infrastructure**
-  - Install: `npm install morgan @types/morgan` (or `pino`)
-  - Add request logging middleware in `src/app.ts`
-  - Log errors in controllers (not just returning to client)
+### 2a. Validation Schema
+- [ ] Create `src/validations/menuItem.validation.ts`
+  - `createMenuItemSchema`: `{ categoryId (uuid, required), name (string, 1-255, stripHtml), price (number, >0), description (string, stripHtml), image (string, url, optional) }`
+  - `updateMenuItemSchema`: all fields optional
+  - `menuItemParamsSchema`: `{ id (uuid) }`
+  - `menuFilterSchema`: `{ categoryId (uuid, optional) }` for query params
 
-- [x] **M-2: Add graceful shutdown handling**
-  - File: `src/server.ts`
-  - Listen for `SIGTERM` and `SIGINT` signals
-  - Call `prisma.$disconnect()` before process exit
-  - Close server gracefully
+### 2b. Repository
+- [ ] Create `src/repositories/menuItem.repository.ts`
+  - Extends `BaseRepository<MenuItem, MenuItemCreateInput, MenuItemUpdateInput>`
+  - Add: `findByCategoryId(categoryId: string): Promise<MenuItem[]>`
+  - Add: `findAllWithCategory(): Promise<MenuItem[]>` — includes `category` relation
 
-- [x] **M-3: Move bcrypt config to env.ts**
-  - File: `src/services/user.service.ts:16`
-  - `Number(process.env.BCRYPT_SALT_ROUNDS)` is read at runtime inside service
-  - Read once in `src/config/env.ts` and export as config constant
+### 2c. Service
+- [ ] Create `src/services/menuItem.service.ts`
+  - `getAll(categoryId?: string)`: list all, optionally filtered by category
+  - `getById(id)`: get single item with category
+  - `create(data)`: create menu item (admin/staff only)
+  - `update(id, data)`: update menu item (admin/staff only)
+  - `delete(id)`: delete menu item (admin/staff only)
 
-- [x] **M-4: Add null check for JWT_SECRET**
-  - File: `src/services/user.service.ts:44`
-  - Replace `process.env.JWT_SECRET as string` with validated config value
-  - Use value from `env.ts` validator instead of raw `process.env`
+### 2d. Controller
+- [ ] Create `src/controllers/menuItem.controller.ts`
+  - Standard CRUD controller following category.controller.ts pattern
+  - All responses use generic error messages (log full error server-side)
 
-- [x] **M-5: Normalize email before validation**
-  - File: `src/validations/user.validation.ts`
-  - Add `.toLowerCase()` transform to email fields in `registerSchema` and `loginSchema`
-  - Prevents duplicate accounts with different casing
+### 2e. Routes
+- [ ] Create `src/routes/menuItem.routes.ts`
+  - `GET /api/menu/` — public, supports `?categoryId=` query filter
+  - `GET /api/menu/:id` — public
+  - `POST /api/menu/` — auth required, ADMIN or STAFF
+  - `PATCH /api/menu/:id` — auth required, ADMIN or STAFF
+  - `DELETE /api/menu/:id` — auth required, ADMIN or STAFF
 
-- [x] **M-6: Handle race condition on category creation**
-  - File: `src/services/category.service.ts:8-15`
-  - Use Prisma `upsert` or wrap in a transaction
-  - Or catch Prisma unique constraint error and return friendly message
-
-- [x] **M-7: Don't return deleted object**
-  - File: `src/controllers/category.controller.ts:45-48`
-  - Change to return `204 No Content` like `deleteUser` does
-  - Remove `deletedCategory` from response body
-
-- [x] **M-8: Move `validateEnv()` to server.ts**
-  - File: `src/app.ts:13`
-  - Currently runs at import time (side effect)
-  - Move to `src/server.ts` before `app.listen()`
-
-- [x] **M-9: Use `import type` for CategoryService**
-  - File: `src/controllers/category.controller.ts:2`
-  - Change `import { CategoryService }` to `import type { CategoryService }`
-
-- [x] **M-10: Remove BaseRepository** `create` **override in subclass4es**
-  - File: `src/repositories/user.repository.ts:12-16`, `category.repository.ts:12-16`
-  - Use base class `create()` method instead of overriding
-  - Or make base `create()` non-abstract and pass prisma model
-
-- [x] **M-11: Sanitize error messages before sending to client**
-  - Files: All controllers
-  - Don't pass raw `error.message` to response
-  - Log full error server-side, return generic message to client
-
-- [x] **M-12: Add request ID tracking**
-  - Install: `npm install uuid @types/uuid` (or use `crypto.randomUUID`)
-  - Add middleware that assigns unique ID to each request
-  - Include in logs and error responses for traceability
-
-- [x] **M-13: Disconnect Prisma on process exit**
-  - File: `lib/prisma.ts`
-  - Export `prisma.$disconnect()` function
-  - Call it in graceful shutdown handler (see M-2)
+### 2f. Wire Up
+- [ ] Update `src/app.ts`
+  - Create MenuItemRepository → MenuItemService → MenuItemController
+  - Create `menuAuthorization = AuthorizationMiddleware([Role.ADMIN, Role.STAFF])`
+  - Mount at `/api/menu`
+  - Import and use validation schemas in routes
 
 ---
 
-## LOW
+## Phase 3 — MenuItem ↔ Ingredient Association
 
-- [x] **L-1: Fix typos in error messages**
-  - `src/controllers/user.controller.ts:51`: `massege` → `message`
-  - `src/controllers/user.controller.ts:67`: `faield` → `failed`
-  - `src/controllers/category.controller.ts:36`: `faield` → `failed`
-  - `src/controllers/category.controller.ts:54`: `failde` → `failed`
+### 3a. Validation Schema
+- [ ] Create `src/validations/menuItemIngredient.validation.ts`
+  - `createMenuItemIngredientSchema`: `{ menuItemId (uuid), ingredientId (uuid), quantityRequired (int, >0) }`
+  - `updateMenuItemIngredientSchema`: `{ quantityRequired (int, >0) }`
 
-- [x] **L-2: Standardize naming conventions**
-  - Service methods: use consistent pattern (e.g., all `create`/`update`/`delete` or all prefixed)
-  - Route variables: `route` vs `router` — pick one
-  - Route paths: decide on `/create` vs bare `/` pattern
+### 3b. Repository
+- [ ] Create `src/repositories/menuItemIngredient.repository.ts`
+  - Extends `BaseRepository<MenuItemIngredient, ...>`
+  - Add: `findByMenuItemId(menuItemId)`: all ingredients for a menu item
+  - Add: `findByIngredientId(ingredientId)`: all menu items using this ingredient
+  - Add: `findUnique(menuItemId, ingredientId)`: find specific association
 
-- [x] **L-3: Add `dotenv` import to app.ts**
-  - File: `src/app.ts`
-  - Add `import "dotenv/config"` at top to ensure env vars are loaded
+### 3c. Service
+- [ ] Create `src/services/menuItemIngredient.service.ts`
+  - `getByMenuItem(menuItemId)`: list ingredients for a menu item
+  - `getByIngredient(ingredientId)`: list menu items using an ingredient
+  - `assign(menuItemId, ingredientId, quantityRequired)`: link ingredient to menu item
+  - `updateQuantity(menuItemId, ingredientId, quantityRequired)`: update quantity
+  - `unassign(menuItemId, ingredientId)`: remove link
 
-- [x] **L-4: Add missing npm scripts**
-  - File: `package.json`
-  - Add `"start": "node dist/server.js"`
-  - Add `"build": "tsc"`
-  - Add `"prisma:generate": "prisma generate"`
+### 3d. Controller
+- [ ] Create `src/controllers/menuItemIngredient.controller.ts`
 
-- [x] **L-5: Fix `main` field in package.json**
-  - File: `package.json:5`
-  - Change `"main": "index.js"` to `"main": "src/server.ts"` or remove it
+### 3e. Routes
+- [ ] Create `src/routes/menuItemIngredient.routes.ts`
+  - `GET /api/menu/:menuItemId/ingredients` — auth required (STAFF+)
+  - `POST /api/menu/:menuItemId/ingredients` — auth required, ADMIN or STAFF
+  - `PATCH /api/menu/:menuItemId/ingredients/:ingredientId` — auth required, ADMIN or STAFF
+  - `DELETE /api/menu/:menuItemId/ingredients/:ingredientId` — auth required, ADMIN or STAFF
 
-- [x] **L-6: Add input sanitization for XSS**
-  - Install: `npm install sanitizer` or use Zod `.transform()` to strip HTML tags
-  - Apply to user names and category names
+### 3f. Wire Up
+- [ ] Update `src/app.ts` — mount at `/api/menu/:menuItemId/ingredients`
 
-- [x] **L-7: Add health check endpoint**
-  - File: `src/app.ts`
-  - Add `GET /health` that returns `200 OK` with `{ status: "ok" }`
-  - Useful for load balancers and monitoring
+---
 
-- [x] **L-8: Fix inconsistent route patterns**
-  - User routes: `/register`, `/login`, `/update/:id`, `/:id`
-  - Category routes: `/create`, `/update/:id`, `/delete/:id`
-  - Align to same pattern (e.g., all use `/:id` for resources)
+## Phase 4 — Cart
 
-- [x] **L-9: Fix category delete controller param**
-  - File: `src/controllers/category.controller.ts:44`
-  - Already fixed to `req.params.id` but verify service accepts `id` not `name`
+### 4a. Validation Schema
+- [ ] Create `src/validations/cart.validation.ts`
+  - `addToCartSchema`: `{ menuItemId (uuid), quantity (int, >=1) }`
+  - `updateCartItemSchema`: `{ quantity (int, >=1) }`
+  - `cartItemParamsSchema`: `{ cartItemId (uuid) }`
 
-- [x] **L-10: Add API documentation**
-  - Install: `npm install swagger-jsdoc swagger-ui-express @types/swagger-jsdoc @types/swagger-ui-express`
-  - Add OpenAPI/Swagger spec for all endpoints
+### 4b. Repository
+- [ ] Create `src/repositories/cart.repository.ts`
+  - Extends `BaseRepository<Cart, CartCreateInput, CartUpdateInput>`
+  - Add: `findByUserId(userId): Promise<Cart | null>` — one cart per user
+  - Add: `findCartWithItems(userId): Promise<Cart & { items: CartItem[] }>` — includes cart items with menu item details
 
-- [x] **L-11: Verify dotenv version**
-  - File: `package.json:27`
-  - `dotenv: ^17.4.2` may not exist, verify and update to latest stable
+### 4c. CartItem Repository
+- [ ] Create `src/repositories/cartItem.repository.ts`
+  - Extends `BaseRepository<CartItem, ...>`
+  - Add: `findByCartIdAndMenuItemId(cartId, menuItemId)`: find specific cart item
+  - Add: `deleteByCartId(cartId)`: clear all items from cart
 
-- [x] **L-12: Add `.env.example`**
-  - Create `.env.example` with placeholder values
-  - Document all required environment variables
-  - Helps new developers set up the project
+### 4d. Service
+- [ ] Create `src/services/cart.service.ts`
+  - `getCart(userId)`: get or create user's cart with items
+  - `addItem(userId, menuItemId, quantity)`: add item (or increment if exists)
+  - `updateItemQuantity(cartItemId, quantity, userId)`: update quantity (ownership check)
+  - `removeItem(cartItemId, userId)`: remove item from cart (ownership check)
+  - `clearCart(userId)`: remove all items from cart
+
+### 4e. Controller
+- [ ] Create `src/controllers/cart.controller.ts`
+  - All cart operations are per-user (check `req.user.id`)
+
+### 4f. Routes
+- [ ] Create `src/routes/cart.routes.ts`
+  - `GET /api/cart/` — auth required (CUSTOMER+), get own cart
+  - `POST /api/cart/items` — auth required (CUSTOMER+), add item
+  - `PATCH /api/cart/items/:cartItemId` — auth required (CUSTOMER+), update quantity
+  - `DELETE /api/cart/items/:cartItemId` — auth required (CUSTOMER+), remove item
+  - `DELETE /api/cart/` — auth required (CUSTOMER+), clear cart
+
+### 4g. Wire Up
+- [ ] Update `src/app.ts` — mount at `/api/cart` with auth middleware for all routes
+
+---
+
+## Phase 5 — Orders
+
+### 5a. Validation Schema
+- [ ] Create `src/validations/order.validation.ts`
+  - `createOrderSchema`: `{ orderType (DINE_IN | TAKEAWAY | DELIVERY) }`
+  - `updateOrderStatusSchema`: `{ status (PREPARING | READY | COMPLETED | CANCELLED) }`
+  - `orderParamsSchema`: `{ id (uuid) }`
+  - `orderFilterSchema`: `{ status (enum, optional) }` for query params
+
+### 5b. Repository
+- [ ] Create `src/repositories/order.repository.ts`
+  - Extends `BaseRepository<Order, ...>`
+  - Add: `findByUserId(userId)`: all orders for a user
+  - Add: `findOrderWithItems(orderId)`: order + orderItems + menuItems
+  - Add: `findAllWithUser()`: all orders with user info (admin view)
+
+### 5c. OrderItem Repository
+- [ ] Create `src/repositories/orderItem.repository.ts`
+  - Extends `BaseRepository<OrderItem, ...>`
+  - Add: `findByOrderId(orderId)`: all items in an order
+
+### 5d. Service
+- [ ] Create `src/services/order.service.ts`
+  - `createOrder(userId, orderType)`: create order from cart
+    - Snapshot menu item prices at time of order
+    - Calculate `totalAmount` from cart items
+    - Clear cart after order creation
+    - Status defaults to `PENDING`
+  - `getAllOrders(userId?, status?)`: admin sees all, customer sees own, optional status filter
+  - `getOrderById(orderId, userId)`: get order with items, ownership check (admin sees any)
+  - `updateOrderStatus(orderId, status)`: admin/staff only, validate status transitions
+    - Allowed transitions: PENDING→PREPARING, PREPARING→READY, READY→COMPLETED, any→CANCELLED
+  - `cancelOrder(orderId, userId)`: customer can cancel own PENDING order
+
+### 5e. Controller
+- [ ] Create `src/controllers/order.controller.ts`
+
+### 5f. Routes
+- [ ] Create `src/routes/order.routes.ts`
+  - `POST /api/orders/` — auth required (CUSTOMER+), create order from cart
+  - `GET /api/orders/` — auth required, ADMIN sees all, CUSTOMER sees own
+  - `GET /api/orders/:id` — auth required, ownership check
+  - `PATCH /api/orders/:id/status` — auth required, ADMIN or STAFF
+  - `DELETE /api/orders/:id` — auth required (CUSTOMER+), cancel own PENDING order
+
+### 5g. Wire Up
+- [ ] Update `src/app.ts` — mount at `/api/orders`
+
+---
+
+## Phase 6 — Payments
+
+### 6a. Validation Schema
+- [ ] Create `src/validations/payment.validation.ts`
+  - `createPaymentSchema`: `{ orderId (uuid), method (CASH | CARD | WALLET), transactionReference (string) }`
+  - `updatePaymentStatusSchema`: `{ status (PAID | FAILED | REFUNDED) }`
+
+### 6b. Repository
+- [ ] Create `src/repositories/payment.repository.ts`
+  - Extends `BaseRepository<Payment, ...>`
+  - Add: `findByOrderId(orderId)`: get payment for an order
+  - Add: `findByTransactionReference(ref)`: lookup by reference
+
+### 6c. Service
+- [ ] Create `src/services/payment.service.ts`
+  - `createPayment(orderId, method, transactionReference)`: create payment record
+    - Validate order exists and has no existing payment
+    - Set initial status to `PENDING`
+  - `updatePaymentStatus(paymentId, status)`: admin only
+    - If status = PAID, set `paidAt` timestamp
+  - `getPaymentByOrder(orderId)`: get payment details for an order
+
+### 6d. Controller
+- [ ] Create `src/controllers/payment.controller.ts`
+
+### 6e. Routes
+- [ ] Create `src/routes/payment.routes.ts`
+  - `POST /api/payments/` — auth required (CUSTOMER+), create payment for own order
+  - `PATCH /api/payments/:id/status` — auth required, ADMIN only
+  - `GET /api/payments/order/:orderId` — auth required, get payment for order
+
+### 6f. Wire Up
+- [ ] Update `src/app.ts` — mount at `/api/payments`
+
+---
+
+## Phase 7 — Inventory
+
+### 7a. Validation Schema
+- [ ] Create `src/validations/ingredient.validation.ts`
+  - `createIngredientSchema`: `{ name (string), unit (KG|G|L|ML|PIECE), quantity (int, >=0), minimumQuantity (int, >=0) }`
+  - `updateIngredientSchema`: all fields optional
+  - `ingredientParamsSchema`: `{ id (uuid) }`
+
+- [ ] Create `src/validations/inventoryTransaction.validation.ts`
+  - `createTransactionSchema`: `{ ingredientId (uuid), type (IN|OUT|ADJUSTMENT), quantity (int, >0), reference (ORDER|MANUAL|RESTOCK), orderId? (uuid) }`
+  - `transactionFilterSchema`: `{ ingredientId? (uuid), type? (enum) }`
+
+### 7b. Repository
+- [ ] Create `src/repositories/ingredient.repository.ts`
+  - Extends `BaseRepository<Ingredient, ...>`
+  - Add: `findLowStock()`: ingredients where `quantity <= minimumQuantity`
+
+- [ ] Create `src/repositories/inventoryTransaction.repository.ts`
+  - Extends `BaseRepository<InventoryTransaction, ...>`
+  - Add: `findByIngredientId(ingredientId)`: transaction history for ingredient
+  - Add: `findByOrderId(orderId)`: transactions linked to an order
+
+### 7c. Service
+- [ ] Create `src/services/ingredient.service.ts`
+  - CRUD for ingredients (admin/staff)
+  - `getLowStock()`: list ingredients below minimum quantity
+
+- [ ] Create `src/services/inventoryTransaction.service.ts`
+  - `createTransaction(data)`: record stock change
+    - IN: increment ingredient quantity
+    - OUT: decrement ingredient quantity (check sufficient stock)
+    - ADJUSTMENT: set quantity to new value
+  - `getByIngredient(ingredientId)`: transaction history
+  - `getLowStockAlerts()`: ingredients needing restock
+
+### 7d. Controller
+- [ ] Create `src/controllers/ingredient.controller.ts`
+- [ ] Create `src/controllers/inventoryTransaction.controller.ts`
+
+### 7e. Routes
+- [ ] Create `src/routes/ingredient.routes.ts`
+  - `GET /api/ingredients/` — auth required (STAFF+), list all
+  - `GET /api/ingredients/low-stock` — auth required (STAFF+), low stock alerts
+  - `GET /api/ingredients/:id` — auth required (STAFF+)
+  - `POST /api/ingredients/` — auth required, ADMIN or STAFF
+  - `PATCH /api/ingredients/:id` — auth required, ADMIN or STAFF
+  - `DELETE /api/ingredients/:id` — auth required, ADMIN only
+
+- [ ] Create `src/routes/inventoryTransaction.routes.ts`
+  - `GET /api/inventory/` — auth required (STAFF+), list transactions (filterable)
+  - `POST /api/inventory/` — auth required, ADMIN or STAFF
+  - `GET /api/inventory/ingredient/:ingredientId` — auth required (STAFF+)
+
+### 7f. Wire Up
+- [ ] Update `src/app.ts` — mount at `/api/ingredients` and `/api/inventory`
+
+---
+
+## Phase 8 — User Admin Enhancements
+
+- [ ] **GET /api/user/** — admin only, list all users with pagination
+- [ ] **GET /api/user/:id** — admin only, get user by ID
+- [ ] **GET /api/user/profile** — auth required, get own profile
+- [ ] **PATCH /api/user/:id/role** — admin only, change user role
+- [ ] Add pagination support to list endpoints (query params: `page`, `limit`)
+- [ ] Add `adminOnly` helper that chains `authMiddleware` + `adminAuthorization`
+
+---
+
+## Phase 9 — Seed Data & Polish
+
+- [ ] **Seed admin user**: email `admin@restaurant.com`, password `admin123`, role ADMIN
+- [ ] **Seed sample menu items**: link existing categories to menu items with prices
+- [ ] **Seed sample ingredients**: common restaurant ingredients (chicken, rice, vegetables, etc.)
+- [ ] **Seed menu-item-ingredient associations**: link menu items to ingredients with quantities
+- [ ] **Add pagination** to all list endpoints (categories, menu items, orders, users, ingredients)
+- [ ] **Complete Swagger docs** for all new endpoints (MenuItem, Cart, Order, Payment, Ingredient, Inventory)
+- [ ] **Add image upload** for menu items (store path in `image` field)
+- [ ] **Add order total calculation** middleware/service helper
+
+---
+
+## Dependency Graph
+
+```
+Phase 1 (Bug Fixes)
+    ↓
+Phase 2 (Menu Item CRUD)  ←  Phase 3 (MenuItem ↔ Ingredient)
+    ↓                              ↓
+Phase 4 (Cart)              Phase 7 (Inventory)
+    ↓                              ↓
+Phase 5 (Orders)  ←←←←←←←←←←←←←←←
+    ↓
+Phase 6 (Payments)
+    ↓
+Phase 8 (User Admin)
+    ↓
+Phase 9 (Seed & Polish)
+```
 
 ---
 
 ## Suggested Priority Order
 
-1. **Security first** (C-1, C-2, C-3, H-1, H-3, H-4)
-2. **Data integrity** (H-5, H-6, C-5)
-3. **Code quality** (H-7, H-8, H-9, M-9)
-4. **Infrastructure** (H-2, M-1, M-2, M-13)
-5. **Polish** (L-1 through L-12)
-
+1. **Phase 1** — Fix bugs (unblocks everything)
+2. **Phase 2** — Menu Item CRUD (core feature, needed for cart/orders)
+3. **Phase 7** — Inventory (ingredients must exist before orders)
+4. **Phase 3** — MenuItem ↔ Ingredient (links menu to inventory)
+5. **Phase 4** — Cart (depends on menu items)
+6. **Phase 5** — Orders (depends on cart + inventory)
+7. **Phase 6** — Payments (depends on orders)
+8. **Phase 8** — User Admin (independent, can be done anytime)
+9. **Phase 9** — Polish (final pass)
