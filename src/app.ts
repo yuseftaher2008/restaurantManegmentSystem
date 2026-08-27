@@ -3,7 +3,6 @@ import type { Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-// [M-1] Added morgan for request logging
 import morgan from "morgan";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
@@ -24,13 +23,11 @@ import { MenuItemController } from "./controllers/menuItem.controller";
 import { createMenuItemRouter } from "./routes/menuItem.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
-// [M-12] Import request ID tracking middleware
 import { requestId } from "./middlewares/requestId";
 
 import { errorHandler } from "./middlewares/errorHandler";
 
 
-// [M-8] Removed validateEnv() call from here - moved to server.ts
 
 const app: Express = express();
 

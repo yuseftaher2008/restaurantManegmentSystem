@@ -1,7 +1,25 @@
 # Restaurant Management System — TODO
 
 > Full feature roadmap after initial codebase review
-> Last updated: 2026-08-24
+> Last updated: 2026-08-26
+
+---
+
+## Progress Summary
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Phase 1** | Fix Existing Bugs | **COMPLETE** (5/5) |
+| **Phase 2** | Menu Item CRUD | **COMPLETE** (6/6) |
+| **Phase 3** | MenuItem ↔ Ingredient Association | **NOT STARTED** (0/6) |
+| **Phase 4** | Cart | **NOT STARTED** (0/7) |
+| **Phase 5** | Orders | **NOT STARTED** (0/7) |
+| **Phase 6** | Payments | **NOT STARTED** (0/6) |
+| **Phase 7** | Inventory | **NOT STARTED** (0/11) |
+| **Phase 8** | User Admin Enhancements | **PARTIAL** (7/8) |
+| **Phase 9** | Seed Data & Polish | **NOT STARTED** (0/8) |
+
+**Overall Progress: 21/59 items complete (~36%)**
 
 ---
 
@@ -61,13 +79,13 @@
 
 ### 2d. Controller
 
-- [ ] Create `src/controllers/menuItem.controller.ts`
+- [x] Create `src/controllers/menuItem.controller.ts`
   - Standard CRUD controller following category.controller.ts pattern
   - All responses use generic error messages (log full error server-side)
 
 ### 2e. Routes
 
-- [ ] Create `src/routes/menuItem.routes.ts`
+- [x] Create `src/routes/menuItem.routes.ts`
   - `GET /api/menu/` — public, supports `?categoryId=` query filter
   - `GET /api/menu/:id` — public
   - `POST /api/menu/` — auth required, ADMIN or STAFF
@@ -76,7 +94,7 @@
 
 ### 2f. Wire Up
 
-- [ ] Update `src/app.ts`
+- [x] Update `src/app.ts`
   - Create MenuItemRepository → MenuItemService → MenuItemController
   - Create `menuAuthorization = AuthorizationMiddleware([Role.ADMIN, Role.STAFF])`
   - Mount at `/api/menu`
