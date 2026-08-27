@@ -1,6 +1,5 @@
 import { prisma } from "../../lib/prisma";
 import type { User } from "../../generated/prisma/client";
-// [H-6] Import UserUpdateInput type for proper typing of update operations
 import type { UserCreateInput, UserUpdateInput } from "../../generated/prisma/models/User";
 import { BaseRepository } from "./base.repository";
 

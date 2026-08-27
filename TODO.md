@@ -36,32 +36,37 @@
 ## Phase 2 — Menu Item CRUD
 
 ### 2a. Validation Schema
-- [ ] Create `src/validations/menuItem.validation.ts`
+
+- [x] Create `src/validations/menuItem.validation.ts`
   - `createMenuItemSchema`: `{ categoryId (uuid, required), name (string, 1-255, stripHtml), price (number, >0), description (string, stripHtml), image (string, url, optional) }`
   - `updateMenuItemSchema`: all fields optional
   - `menuItemParamsSchema`: `{ id (uuid) }`
   - `menuFilterSchema`: `{ categoryId (uuid, optional) }` for query params
 
 ### 2b. Repository
-- [ ] Create `src/repositories/menuItem.repository.ts`
+
+- [x] Create `src/repositories/menuItem.repository.ts`
   - Extends `BaseRepository<MenuItem, MenuItemCreateInput, MenuItemUpdateInput>`
   - Add: `findByCategoryId(categoryId: string): Promise<MenuItem[]>`
   - Add: `findAllWithCategory(): Promise<MenuItem[]>` — includes `category` relation
 
 ### 2c. Service
-- [ ] Create `src/services/menuItem.service.ts`
+
+- [x] Create `src/services/menuItem.service.ts`
   - `getAll(categoryId?: string)`: list all, optionally filtered by category
   - `getById(id)`: get single item with category
-  - `create(data)`: create menu item (admin/staff only)
+    - `create(data)`: create menu item (admin/staff only)
   - `update(id, data)`: update menu item (admin/staff only)
   - `delete(id)`: delete menu item (admin/staff only)
 
 ### 2d. Controller
+
 - [ ] Create `src/controllers/menuItem.controller.ts`
   - Standard CRUD controller following category.controller.ts pattern
   - All responses use generic error messages (log full error server-side)
 
 ### 2e. Routes
+
 - [ ] Create `src/routes/menuItem.routes.ts`
   - `GET /api/menu/` — public, supports `?categoryId=` query filter
   - `GET /api/menu/:id` — public
@@ -70,6 +75,7 @@
   - `DELETE /api/menu/:id` — auth required, ADMIN or STAFF
 
 ### 2f. Wire Up
+
 - [ ] Update `src/app.ts`
   - Create MenuItemRepository → MenuItemService → MenuItemController
   - Create `menuAuthorization = AuthorizationMiddleware([Role.ADMIN, Role.STAFF])`
@@ -81,11 +87,13 @@
 ## Phase 3 — MenuItem ↔ Ingredient Association
 
 ### 3a. Validation Schema
+
 - [ ] Create `src/validations/menuItemIngredient.validation.ts`
   - `createMenuItemIngredientSchema`: `{ menuItemId (uuid), ingredientId (uuid), quantityRequired (int, >0) }`
   - `updateMenuItemIngredientSchema`: `{ quantityRequired (int, >0) }`
 
 ### 3b. Repository
+
 - [ ] Create `src/repositories/menuItemIngredient.repository.ts`
   - Extends `BaseRepository<MenuItemIngredient, ...>`
   - Add: `findByMenuItemId(menuItemId)`: all ingredients for a menu item
@@ -93,6 +101,7 @@
   - Add: `findUnique(menuItemId, ingredientId)`: find specific association
 
 ### 3c. Service
+
 - [ ] Create `src/services/menuItemIngredient.service.ts`
   - `getByMenuItem(menuItemId)`: list ingredients for a menu item
   - `getByIngredient(ingredientId)`: list menu items using an ingredient
@@ -101,9 +110,11 @@
   - `unassign(menuItemId, ingredientId)`: remove link
 
 ### 3d. Controller
+
 - [ ] Create `src/controllers/menuItemIngredient.controller.ts`
 
 ### 3e. Routes
+
 - [ ] Create `src/routes/menuItemIngredient.routes.ts`
   - `GET /api/menu/:menuItemId/ingredients` — auth required (STAFF+)
   - `POST /api/menu/:menuItemId/ingredients` — auth required, ADMIN or STAFF
@@ -111,6 +122,7 @@
   - `DELETE /api/menu/:menuItemId/ingredients/:ingredientId` — auth required, ADMIN or STAFF
 
 ### 3f. Wire Up
+
 - [ ] Update `src/app.ts` — mount at `/api/menu/:menuItemId/ingredients`
 
 ---
@@ -118,24 +130,28 @@
 ## Phase 4 — Cart
 
 ### 4a. Validation Schema
+
 - [ ] Create `src/validations/cart.validation.ts`
   - `addToCartSchema`: `{ menuItemId (uuid), quantity (int, >=1) }`
   - `updateCartItemSchema`: `{ quantity (int, >=1) }`
   - `cartItemParamsSchema`: `{ cartItemId (uuid) }`
 
 ### 4b. Repository
+
 - [ ] Create `src/repositories/cart.repository.ts`
   - Extends `BaseRepository<Cart, CartCreateInput, CartUpdateInput>`
   - Add: `findByUserId(userId): Promise<Cart | null>` — one cart per user
   - Add: `findCartWithItems(userId): Promise<Cart & { items: CartItem[] }>` — includes cart items with menu item details
 
 ### 4c. CartItem Repository
+
 - [ ] Create `src/repositories/cartItem.repository.ts`
   - Extends `BaseRepository<CartItem, ...>`
   - Add: `findByCartIdAndMenuItemId(cartId, menuItemId)`: find specific cart item
   - Add: `deleteByCartId(cartId)`: clear all items from cart
 
 ### 4d. Service
+
 - [ ] Create `src/services/cart.service.ts`
   - `getCart(userId)`: get or create user's cart with items
   - `addItem(userId, menuItemId, quantity)`: add item (or increment if exists)
@@ -144,10 +160,12 @@
   - `clearCart(userId)`: remove all items from cart
 
 ### 4e. Controller
+
 - [ ] Create `src/controllers/cart.controller.ts`
   - All cart operations are per-user (check `req.user.id`)
 
 ### 4f. Routes
+
 - [ ] Create `src/routes/cart.routes.ts`
   - `GET /api/cart/` — auth required (CUSTOMER+), get own cart
   - `POST /api/cart/items` — auth required (CUSTOMER+), add item
@@ -156,6 +174,7 @@
   - `DELETE /api/cart/` — auth required (CUSTOMER+), clear cart
 
 ### 4g. Wire Up
+
 - [ ] Update `src/app.ts` — mount at `/api/cart` with auth middleware for all routes
 
 ---
@@ -163,6 +182,7 @@
 ## Phase 5 — Orders
 
 ### 5a. Validation Schema
+
 - [ ] Create `src/validations/order.validation.ts`
   - `createOrderSchema`: `{ orderType (DINE_IN | TAKEAWAY | DELIVERY) }`
   - `updateOrderStatusSchema`: `{ status (PREPARING | READY | COMPLETED | CANCELLED) }`
@@ -170,6 +190,7 @@
   - `orderFilterSchema`: `{ status (enum, optional) }` for query params
 
 ### 5b. Repository
+
 - [ ] Create `src/repositories/order.repository.ts`
   - Extends `BaseRepository<Order, ...>`
   - Add: `findByUserId(userId)`: all orders for a user
@@ -177,11 +198,13 @@
   - Add: `findAllWithUser()`: all orders with user info (admin view)
 
 ### 5c. OrderItem Repository
+
 - [ ] Create `src/repositories/orderItem.repository.ts`
   - Extends `BaseRepository<OrderItem, ...>`
   - Add: `findByOrderId(orderId)`: all items in an order
 
 ### 5d. Service
+
 - [ ] Create `src/services/order.service.ts`
   - `createOrder(userId, orderType)`: create order from cart
     - Snapshot menu item prices at time of order
@@ -195,9 +218,11 @@
   - `cancelOrder(orderId, userId)`: customer can cancel own PENDING order
 
 ### 5e. Controller
+
 - [ ] Create `src/controllers/order.controller.ts`
 
 ### 5f. Routes
+
 - [ ] Create `src/routes/order.routes.ts`
   - `POST /api/orders/` — auth required (CUSTOMER+), create order from cart
   - `GET /api/orders/` — auth required, ADMIN sees all, CUSTOMER sees own
@@ -206,6 +231,7 @@
   - `DELETE /api/orders/:id` — auth required (CUSTOMER+), cancel own PENDING order
 
 ### 5g. Wire Up
+
 - [ ] Update `src/app.ts` — mount at `/api/orders`
 
 ---
@@ -213,17 +239,20 @@
 ## Phase 6 — Payments
 
 ### 6a. Validation Schema
+
 - [ ] Create `src/validations/payment.validation.ts`
   - `createPaymentSchema`: `{ orderId (uuid), method (CASH | CARD | WALLET), transactionReference (string) }`
   - `updatePaymentStatusSchema`: `{ status (PAID | FAILED | REFUNDED) }`
 
 ### 6b. Repository
+
 - [ ] Create `src/repositories/payment.repository.ts`
   - Extends `BaseRepository<Payment, ...>`
   - Add: `findByOrderId(orderId)`: get payment for an order
   - Add: `findByTransactionReference(ref)`: lookup by reference
 
 ### 6c. Service
+
 - [ ] Create `src/services/payment.service.ts`
   - `createPayment(orderId, method, transactionReference)`: create payment record
     - Validate order exists and has no existing payment
@@ -233,15 +262,18 @@
   - `getPaymentByOrder(orderId)`: get payment details for an order
 
 ### 6d. Controller
+
 - [ ] Create `src/controllers/payment.controller.ts`
 
 ### 6e. Routes
+
 - [ ] Create `src/routes/payment.routes.ts`
   - `POST /api/payments/` — auth required (CUSTOMER+), create payment for own order
   - `PATCH /api/payments/:id/status` — auth required, ADMIN only
   - `GET /api/payments/order/:orderId` — auth required, get payment for order
 
 ### 6f. Wire Up
+
 - [ ] Update `src/app.ts` — mount at `/api/payments`
 
 ---
@@ -249,6 +281,7 @@
 ## Phase 7 — Inventory
 
 ### 7a. Validation Schema
+
 - [ ] Create `src/validations/ingredient.validation.ts`
   - `createIngredientSchema`: `{ name (string), unit (KG|G|L|ML|PIECE), quantity (int, >=0), minimumQuantity (int, >=0) }`
   - `updateIngredientSchema`: all fields optional
@@ -259,6 +292,7 @@
   - `transactionFilterSchema`: `{ ingredientId? (uuid), type? (enum) }`
 
 ### 7b. Repository
+
 - [ ] Create `src/repositories/ingredient.repository.ts`
   - Extends `BaseRepository<Ingredient, ...>`
   - Add: `findLowStock()`: ingredients where `quantity <= minimumQuantity`
@@ -269,6 +303,7 @@
   - Add: `findByOrderId(orderId)`: transactions linked to an order
 
 ### 7c. Service
+
 - [ ] Create `src/services/ingredient.service.ts`
   - CRUD for ingredients (admin/staff)
   - `getLowStock()`: list ingredients below minimum quantity
@@ -282,10 +317,12 @@
   - `getLowStockAlerts()`: ingredients needing restock
 
 ### 7d. Controller
+
 - [ ] Create `src/controllers/ingredient.controller.ts`
 - [ ] Create `src/controllers/inventoryTransaction.controller.ts`
 
 ### 7e. Routes
+
 - [ ] Create `src/routes/ingredient.routes.ts`
   - `GET /api/ingredients/` — auth required (STAFF+), list all
   - `GET /api/ingredients/low-stock` — auth required (STAFF+), low stock alerts
@@ -300,6 +337,7 @@
   - `GET /api/inventory/ingredient/:ingredientId` — auth required (STAFF+)
 
 ### 7f. Wire Up
+
 - [ ] Update `src/app.ts` — mount at `/api/ingredients` and `/api/inventory`
 
 ---
@@ -361,3 +399,4 @@ Phase 9 (Seed & Polish)
 7. **Phase 6** — Payments (depends on orders)
 8. **Phase 8** — User Admin (independent, can be done anytime)
 9. **Phase 9** — Polish (final pass)
+
