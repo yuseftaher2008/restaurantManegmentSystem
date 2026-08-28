@@ -18,7 +18,6 @@ export class CategoryService {
         return category;
     }
 
-    // [M-6] Handle race condition on category creation by catching unique constraint error
     async createCategory (data:CategoryCreateInput):Promise<Category> {
         const existingCategory = await this.categoryRepository.findByName(data.name)
         if(existingCategory){

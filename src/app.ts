@@ -21,6 +21,10 @@ import { MenuItemRepository } from "./repositories/menuItem.repository";
 import { MenuItemService } from "./services/menuItem.service";
 import { MenuItemController } from "./controllers/menuItem.controller";
 import { createMenuItemRouter } from "./routes/menuItem.routes";
+import { IngredientRepository } from "./repositories/ingredient.repository";
+import { IngredientService } from "./services/ingredient.service";
+import { IngredientController } from "./controllers/ingredient.controller";
+import { createIngredientRouter } from "./routes/ingredient.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
 import { requestId } from "./middlewares/requestId";
@@ -44,6 +48,10 @@ const menuItemRepository = new MenuItemRepository();
 const menuItemService = new MenuItemService(menuItemRepository);
 const menuItemController = new MenuItemController(menuItemService);
 
+const ingredientRepository = new IngredientRepository();
+const ingredientService = new IngredientService(ingredientRepository);
+const ingredientController = new IngredientController(ingredientService);
+
 const authMiddleware = new AuthMiddleware(JWT_SECRET);
 const adminAuthorization = new AuthorizationMiddleware([
   Role.ADMIN,
@@ -55,6 +63,13 @@ const categoryAuthorization = new AuthorizationMiddleware([
 const menuAuthorization = new AuthorizationMiddleware([
     Role.ADMIN,
     Role.STAFF
+]);
+const ingredientAuthorization = new AuthorizationMiddleware([
+    Role.ADMIN,
+    Role.STAFF
+]);
+const ingredientAdminAuthorization = new AuthorizationMiddleware([
+    Role.ADMIN
 ]);
 
 
@@ -115,6 +130,11 @@ app.use(
 app.use(
     "/api/menu",
     createMenuItemRouter(menuItemController, authMiddleware, menuAuthorization)
+);
+
+app.use(
+    "/api/ingredients",
+    createIngredientRouter(ingredientController, authMiddleware, ingredientAuthorization, ingredientAdminAuthorization)
 );
 
 
