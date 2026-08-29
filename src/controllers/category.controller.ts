@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { CategoryService } from "../services/category.service";
-import type { UpdateCategoryInput } from "../validations/category.validation";
+import type { CreateCategoryInput, UpdateCategoryInput } from "../validations/category.validation";
 
 export class CategoryController {
     constructor(private categoryService: CategoryService){}
@@ -28,7 +28,7 @@ export class CategoryController {
 
     async createCategory(req: Request, res: Response): Promise<void> {
         try {
-            const { name } = req.body;
+            const { name }: CreateCategoryInput = req.body;
             const category = await this.categoryService.createCategory({ name });
             res.status(201).json({ message: "category created", data: category });
         } catch (error) {

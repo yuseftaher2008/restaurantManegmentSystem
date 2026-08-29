@@ -89,7 +89,7 @@ export function createMenuItemRouter(
      *         application/json:
      *           schema:
      *             type: object
-     *             required: [categoryId, name, price, description]
+      *             required: [categoryId, name, price, description, image]
      *             properties:
      *               categoryId:
      *                 type: string

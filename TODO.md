@@ -12,7 +12,7 @@
 | **Phase 1** | Fix Existing Bugs | **COMPLETE** (5/5) |
 | **Phase 2** | Menu Item CRUD | **COMPLETE** (6/6) |
 | **Phase 3** | Ingredient CRUD | **COMPLETE** (6/6) |
-| **Phase 4** | MenuItem ↔ Ingredient Association | **NOT STARTED** (0/6) |
+| **Phase 4** | MenuItem ↔ Ingredient Association | **COMPLETE** (6/6) |
 | **Phase 5** | Cart | **NOT STARTED** (0/7) |
 | **Phase 6** | Orders | **NOT STARTED** (0/7) |
 | **Phase 7** | Payments | **NOT STARTED** (0/6) |
@@ -21,7 +21,7 @@
 | **Phase 10** | Seed Data & Polish | **NOT STARTED** (0/8) |
 | **Phase 11** | Architecture Improvements | **NOT STARTED** (0/20) |
 
-**Overall Progress: 26/79 items complete (~33%)**
+**Overall Progress: 32/79 items complete (~41%)**
 
 ---
 
@@ -160,7 +160,7 @@
 
 ### 4a. Validation Schema
 
-- [ ] Create `src/validations/menuItemIngredient.validation.ts`
+- [x] Create `src/validations/menuItemIngredient.validation.ts`
   - `createMenuItemIngredientSchema`: `{ menuItemId (uuid), ingredientId (uuid), quantityRequired (int, >0) }`
   - `updateMenuItemIngredientSchema`: `{ quantityRequired (int, >0) }`
   - `menuItemIngredientParamsSchema`: `{ id (uuid) }`
@@ -168,7 +168,7 @@
 
 ### 4b. Repository
 
-- [ ] Create `src/repositories/menuItemIngredient.repository.ts`
+- [x] Create `src/repositories/menuItemIngredient.repository.ts`
   - Extends `BaseRepository<MenuItemIngredient, MenuItemIngredientUncheckedCreateInput, MenuItemIngredientUpdateInput>`
   - Add: `findByMenuItemId(menuItemId: string): Promise<MenuItemIngredient[]>`
   - Add: `findByIngredientId(ingredientId: string): Promise<MenuItemIngredient[]>`
@@ -176,7 +176,7 @@
 
 ### 4c. Service
 
-- [ ] Create `src/services/menuItemIngredient.service.ts`
+- [x] Create `src/services/menuItemIngredient.service.ts`
   - `getAllByMenuItemId(menuItemId)`: list ingredients for a menu item
   - `getAllByIngredientId(ingredientId)`: list menu items using an ingredient
   - `getById(id)`: get single association
@@ -188,13 +188,13 @@
 
 ### 4d. Controller
 
-- [ ] Create `src/controllers/menuItemIngredient.controller.ts`
+- [x] Create `src/controllers/menuItemIngredient.controller.ts`
   - Standard CRUD controller following category.controller.ts pattern
   - All responses use generic error messages (log full error server-side)
 
 ### 4e. Routes
 
-- [ ] Create `src/routes/menuItemIngredient.routes.ts`
+- [x] Create `src/routes/menuItemIngredient.routes.ts`
   - `GET /api/menu/:menuItemId/ingredients` — auth required (STAFF+)
   - `GET /api/menu/:menuItemId/ingredients/:id` — auth required (STAFF+)
   - `POST /api/menu/:menuItemId/ingredients` — auth required, ADMIN or STAFF
@@ -203,7 +203,7 @@
 
 ### 4f. Wire Up
 
-- [ ] Update `src/app.ts`
+- [x] Update `src/app.ts`
   - Create MenuItemIngredientRepository → MenuItemIngredientService → MenuItemIngredientController
   - Create `menuIngredientAuthorization = AuthorizationMiddleware([Role.ADMIN, Role.STAFF])`
   - Mount at `/api/menu/:menuItemId/ingredients`

@@ -25,6 +25,10 @@ import { IngredientRepository } from "./repositories/ingredient.repository";
 import { IngredientService } from "./services/ingredient.service";
 import { IngredientController } from "./controllers/ingredient.controller";
 import { createIngredientRouter } from "./routes/ingredient.routes";
+import { MenuItemIngredientRepository } from "./repositories/menuItemIngredient.repository";
+import { MenuItemIngredientService } from "./services/menuItemIngredient.service";
+import { MenuItemIngredientController } from "./controllers/menuItemIngredient.controller";
+import { createMenuItemIngredientRouter } from "./routes/menuItemIngredient.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
 import { requestId } from "./middlewares/requestId";
@@ -52,6 +56,10 @@ const ingredientRepository = new IngredientRepository();
 const ingredientService = new IngredientService(ingredientRepository);
 const ingredientController = new IngredientController(ingredientService);
 
+const menuItemIngredientRepository = new MenuItemIngredientRepository();
+const menuItemIngredientService = new MenuItemIngredientService(menuItemIngredientRepository, menuItemRepository, ingredientRepository);
+const menuItemIngredientController = new MenuItemIngredientController(menuItemIngredientService);
+
 const authMiddleware = new AuthMiddleware(JWT_SECRET);
 const adminAuthorization = new AuthorizationMiddleware([
   Role.ADMIN,
@@ -70,6 +78,10 @@ const ingredientAuthorization = new AuthorizationMiddleware([
 ]);
 const ingredientAdminAuthorization = new AuthorizationMiddleware([
     Role.ADMIN
+]);
+const menuIngredientAuthorization = new AuthorizationMiddleware([
+    Role.ADMIN,
+    Role.STAFF
 ]);
 
 
@@ -125,6 +137,11 @@ app.use(
         authMiddleware,
         categoryAuthorization,
     )
+);
+
+app.use(
+    "/api/menu/:menuItemId/ingredients",
+    createMenuItemIngredientRouter(menuItemIngredientController, authMiddleware, menuIngredientAuthorization)
 );
 
 app.use(

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { IngredientService } from "../services/ingredient.service";
-import type { UpdateIngredientInput } from "../validations/ingredient.validation";
+import type { CreateIngredientInput, UpdateIngredientInput } from "../validations/ingredient.validation";
 
 export class IngredientController {
     constructor(private ingredientService: IngredientService) {}
@@ -38,7 +38,8 @@ export class IngredientController {
 
     async createIngredient(req: Request, res: Response): Promise<void> {
         try {
-            const ingredient = await this.ingredientService.create(req.body);
+            const data: CreateIngredientInput = req.body;
+            const ingredient = await this.ingredientService.create(data);
             res.status(201).json({ message: "ingredient created", data: ingredient });
         } catch (error) {
             console.error("[CREATE INGREDIENT ERROR]", error);

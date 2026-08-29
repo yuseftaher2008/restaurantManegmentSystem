@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { MenuItemService } from "../services/menuItem.service";
-import type { MenuFilter } from "../validations/menuItem.validation";
+import type { CreateMenuItemInput, UpdateMenuItemInput, MenuFilter } from "../validations/menuItem.validation";
 
 export class MenuItemController {
     constructor(private menuItemService: MenuItemService) {}
@@ -29,7 +29,8 @@ export class MenuItemController {
 
     async createMenuItem(req: Request, res: Response): Promise<void> {
         try {
-            const item = await this.menuItemService.create(req.body);
+            const data: CreateMenuItemInput = req.body;
+            const item = await this.menuItemService.create(data);
             res.status(201).json({ message: "menu item created", data: item });
         } catch (error) {
             console.error("[CREATE MENU ITEM ERROR]", error);
@@ -40,7 +41,8 @@ export class MenuItemController {
     async updateMenuItem(req: Request, res: Response): Promise<void> {
         try {
             const id = req.params.id as string;
-            const item = await this.menuItemService.update(id, req.body);
+            const data: UpdateMenuItemInput = req.body;
+            const item = await this.menuItemService.update(id, data);
             res.json({ message: "menu item updated", data: item });
         } catch (error) {
             console.error("[UPDATE MENU ITEM ERROR]", error);

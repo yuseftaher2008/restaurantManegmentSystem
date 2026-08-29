@@ -12,7 +12,7 @@ export const createMenuItemSchema = z.object({
     .transform(stripHtml),
   price: z.number().positive("Price must be greater than 0"),
   description: z.string().min(1, "Description is required").transform(stripHtml),
-  image: z.string().url("Invalid URL").optional(),
+  image: z.string().url("Invalid URL"),
 });
 
 export const updateMenuItemSchema = z.object({
