@@ -13,7 +13,7 @@
 | **Phase 2** | Menu Item CRUD | **COMPLETE** (6/6) |
 | **Phase 3** | Ingredient CRUD | **COMPLETE** (6/6) |
 | **Phase 4** | MenuItem ↔ Ingredient Association | **COMPLETE** (6/6) |
-| **Phase 5** | Cart | **NOT STARTED** (0/7) |
+| **Phase 5** | Cart | **COMPLETE** (7/7) |
 | **Phase 6** | Orders | **NOT STARTED** (0/7) |
 | **Phase 7** | Payments | **NOT STARTED** (0/6) |
 | **Phase 8** | Inventory Transactions | **NOT STARTED** (0/5) |
@@ -21,7 +21,7 @@
 | **Phase 10** | Seed Data & Polish | **NOT STARTED** (0/8) |
 | **Phase 11** | Architecture Improvements | **NOT STARTED** (0/20) |
 
-**Overall Progress: 32/79 items complete (~41%)**
+**Overall Progress: 39/79 items complete (~49%)**
 
 ---
 
@@ -215,28 +215,28 @@
 
 ### 5a. Validation Schema
 
-- [ ] Create `src/validations/cart.validation.ts`
+- [x] Create `src/validations/cart.validation.ts`
   - `addToCartSchema`: `{ menuItemId (uuid), quantity (int, >=1) }`
   - `updateCartItemSchema`: `{ quantity (int, >=1) }`
   - `cartItemParamsSchema`: `{ cartItemId (uuid) }`
 
 ### 5b. Repository
 
-- [ ] Create `src/repositories/cart.repository.ts`
+- [x] Create `src/repositories/cart.repository.ts`
   - Extends `BaseRepository<Cart, CartCreateInput, CartUpdateInput>`
   - Add: `findByUserId(userId): Promise<Cart | null>` — one cart per user
   - Add: `findCartWithItems(userId): Promise<Cart & { items: CartItem[] }>` — includes cart items with menu item details
 
 ### 5c. CartItem Repository
 
-- [ ] Create `src/repositories/cartItem.repository.ts`
+- [x] Create `src/repositories/cartItem.repository.ts`
   - Extends `BaseRepository<CartItem, ...>`
   - Add: `findByCartIdAndMenuItemId(cartId, menuItemId)`: find specific cart item
   - Add: `deleteByCartId(cartId)`: clear all items from cart
 
 ### 5d. Service
 
-- [ ] Create `src/services/cart.service.ts`
+- [x] Create `src/services/cart.service.ts`
   - `getCart(userId)`: get or create user's cart with items
   - `addItem(userId, menuItemId, quantity)`: add item (or increment if exists)
   - `updateItemQuantity(cartItemId, quantity, userId)`: update quantity (ownership check)
@@ -245,12 +245,12 @@
 
 ### 5e. Controller
 
-- [ ] Create `src/controllers/cart.controller.ts`
+- [x] Create `src/controllers/cart.controller.ts`
   - All cart operations are per-user (check `req.user.id`)
 
 ### 5f. Routes
 
-- [ ] Create `src/routes/cart.routes.ts`
+- [x] Create `src/routes/cart.routes.ts`
   - `GET /api/cart/` — auth required (CUSTOMER+), get own cart
   - `POST /api/cart/items` — auth required (CUSTOMER+), add item
   - `PATCH /api/cart/items/:cartItemId` — auth required (CUSTOMER+), update quantity
@@ -259,7 +259,7 @@
 
 ### 5g. Wire Up
 
-- [ ] Update `src/app.ts` — mount at `/api/cart` with auth middleware for all routes
+- [x] Update `src/app.ts` — mount at `/api/cart` with auth middleware for all routes
 
 ---
 

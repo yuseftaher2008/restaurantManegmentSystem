@@ -29,6 +29,11 @@ import { MenuItemIngredientRepository } from "./repositories/menuItemIngredient.
 import { MenuItemIngredientService } from "./services/menuItemIngredient.service";
 import { MenuItemIngredientController } from "./controllers/menuItemIngredient.controller";
 import { createMenuItemIngredientRouter } from "./routes/menuItemIngredient.routes";
+import { CartRepository } from "./repositories/cart.repository";
+import { CartItemRepository } from "./repositories/cartItem.repository";
+import { CartService } from "./services/cart.service";
+import { CartController } from "./controllers/cart.controller";
+import { createCartRouter } from "./routes/cart.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
 import { requestId } from "./middlewares/requestId";
@@ -60,6 +65,11 @@ const menuItemIngredientRepository = new MenuItemIngredientRepository();
 const menuItemIngredientService = new MenuItemIngredientService(menuItemIngredientRepository, menuItemRepository, ingredientRepository);
 const menuItemIngredientController = new MenuItemIngredientController(menuItemIngredientService);
 
+const cartRepository = new CartRepository();
+const cartItemRepository = new CartItemRepository();
+const cartService = new CartService(cartRepository, cartItemRepository, menuItemRepository);
+const cartController = new CartController(cartService);
+
 const authMiddleware = new AuthMiddleware(JWT_SECRET);
 const adminAuthorization = new AuthorizationMiddleware([
   Role.ADMIN,
@@ -82,6 +92,11 @@ const ingredientAdminAuthorization = new AuthorizationMiddleware([
 const menuIngredientAuthorization = new AuthorizationMiddleware([
     Role.ADMIN,
     Role.STAFF
+]);
+const customerAuthorization = new AuthorizationMiddleware([
+    Role.CUSTOMER,
+    Role.STAFF,
+    Role.ADMIN
 ]);
 
 
@@ -154,6 +169,10 @@ app.use(
     createIngredientRouter(ingredientController, authMiddleware, ingredientAuthorization, ingredientAdminAuthorization)
 );
 
+app.use(
+    "/api/cart",
+    createCartRouter(cartController, authMiddleware, customerAuthorization)
+);
 
 app.use(errorHandler);
 
