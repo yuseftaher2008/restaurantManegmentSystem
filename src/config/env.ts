@@ -1,6 +1,7 @@
 // [M-3, M-4] Export validated environment constants
 export let BCRYPT_SALT_ROUNDS: number;
 export let JWT_SECRET: string;
+export let ALLOWED_ORIGINS: string[];
 
 export function validateEnv() {
     if (!process.env.DATABASE_URL) {
@@ -19,4 +20,8 @@ export function validateEnv() {
         throw new Error("JWT_SECRET must be at least 32 characters long");
     }
     JWT_SECRET = process.env.JWT_SECRET;
+
+    // CORS allowed origins
+    const origins = process.env.ALLOWED_ORIGINS;
+    ALLOWED_ORIGINS = origins ? origins.split(",").map((o) => o.trim()) : ["*"];
 }

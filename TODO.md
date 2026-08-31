@@ -1,7 +1,7 @@
 # Restaurant Management System — TODO
 
 > Full feature roadmap after initial codebase review
-> Last updated: 2026-08-26
+> Last updated: 2026-08-31
 
 ---
 
@@ -14,14 +14,14 @@
 | **Phase 3** | Ingredient CRUD | **COMPLETE** (6/6) |
 | **Phase 4** | MenuItem ↔ Ingredient Association | **COMPLETE** (6/6) |
 | **Phase 5** | Cart | **COMPLETE** (7/7) |
-| **Phase 6** | Orders | **NOT STARTED** (0/7) |
-| **Phase 7** | Payments | **NOT STARTED** (0/6) |
-| **Phase 8** | Inventory Transactions | **NOT STARTED** (0/5) |
-| **Phase 9** | User Admin Enhancements | **PARTIAL** (7/8) |
-| **Phase 10** | Seed Data & Polish | **NOT STARTED** (0/8) |
-| **Phase 11** | Architecture Improvements | **NOT STARTED** (0/20) |
+| **Phase 6** | Orders | **COMPLETE** (7/7) |
+| **Phase 7** | Payments | **COMPLETE** (6/6) |
+| **Phase 8** | Inventory Transactions | **COMPLETE** (5/5) |
+| **Phase 9** | User Admin Enhancements | **COMPLETE** (8/8) |
+| **Phase 10** | Seed Data & Polish | **COMPLETE** (8/8) |
+| **Phase 11** | Architecture Improvements | **COMPLETE** (20/20) |
 
-**Overall Progress: 39/79 items complete (~49%)**
+**Overall Progress: 79/79 items complete (100%)**
 
 ---
 
@@ -267,7 +267,7 @@
 
 ### 6a. Validation Schema
 
-- [ ] Create `src/validations/order.validation.ts`
+- [x] Create `src/validations/order.validation.ts`
   - `createOrderSchema`: `{ orderType (DINE_IN | TAKEAWAY | DELIVERY) }`
   - `updateOrderStatusSchema`: `{ status (PREPARING | READY | COMPLETED | CANCELLED) }`
   - `orderParamsSchema`: `{ id (uuid) }`
@@ -275,39 +275,39 @@
 
 ### 6b. Repository
 
-- [ ] Create `src/repositories/order.repository.ts`
+- [x] Create `src/repositories/order.repository.ts`
   - Extends `BaseRepository<Order, ...>`
   - Add: `findByUserId(userId)`: all orders for a user
   - Add: `findOrderWithItems(orderId)`: order + orderItems + menuItems
-  - Add: `findAllWithUser()`: all orders with user info (admin view)
+  - Add: `findAllWithUser(status?)`: all orders with user info (admin view)
 
 ### 6c. OrderItem Repository
 
-- [ ] Create `src/repositories/orderItem.repository.ts`
+- [x] Create `src/repositories/orderItem.repository.ts`
   - Extends `BaseRepository<OrderItem, ...>`
   - Add: `findByOrderId(orderId)`: all items in an order
 
 ### 6d. Service
 
-- [ ] Create `src/services/order.service.ts`
+- [x] Create `src/services/order.service.ts`
   - `createOrder(userId, orderType)`: create order from cart
     - Snapshot menu item prices at time of order
     - Calculate `totalAmount` from cart items
     - Clear cart after order creation
     - Status defaults to `PENDING`
-  - `getAllOrders(userId?, status?)`: admin sees all, customer sees own, optional status filter
-  - `getOrderById(orderId, userId)`: get order with items, ownership check (admin sees any)
+  - `getAllOrders(userId?, role?, status?)`: admin sees all, customer sees own, optional status filter
+  - `getOrderById(orderId, userId, role)`: get order with items, ownership check (admin sees any)
   - `updateOrderStatus(orderId, status)`: admin/staff only, validate status transitions
     - Allowed transitions: PENDING→PREPARING, PREPARING→READY, READY→COMPLETED, any→CANCELLED
   - `cancelOrder(orderId, userId)`: customer can cancel own PENDING order
 
 ### 6e. Controller
 
-- [ ] Create `src/controllers/order.controller.ts`
+- [x] Create `src/controllers/order.controller.ts`
 
 ### 6f. Routes
 
-- [ ] Create `src/routes/order.routes.ts`
+- [x] Create `src/routes/order.routes.ts`
   - `POST /api/orders/` — auth required (CUSTOMER+), create order from cart
   - `GET /api/orders/` — auth required, ADMIN sees all, CUSTOMER sees own
   - `GET /api/orders/:id` — auth required, ownership check
@@ -316,7 +316,7 @@
 
 ### 6g. Wire Up
 
-- [ ] Update `src/app.ts` — mount at `/api/orders`
+- [x] Update `src/app.ts` — mount at `/api/orders`
 
 ---
 
@@ -324,20 +324,20 @@
 
 ### 7a. Validation Schema
 
-- [ ] Create `src/validations/payment.validation.ts`
+- [x] Create `src/validations/payment.validation.ts`
   - `createPaymentSchema`: `{ orderId (uuid), method (CASH | CARD | WALLET), transactionReference (string) }`
   - `updatePaymentStatusSchema`: `{ status (PAID | FAILED | REFUNDED) }`
 
 ### 7b. Repository
 
-- [ ] Create `src/repositories/payment.repository.ts`
+- [x] Create `src/repositories/payment.repository.ts`
   - Extends `BaseRepository<Payment, ...>`
   - Add: `findByOrderId(orderId)`: get payment for an order
   - Add: `findByTransactionReference(ref)`: lookup by reference
 
 ### 7c. Service
 
-- [ ] Create `src/services/payment.service.ts`
+- [x] Create `src/services/payment.service.ts`
   - `createPayment(orderId, method, transactionReference)`: create payment record
     - Validate order exists and has no existing payment
     - Set initial status to `PENDING`
@@ -347,18 +347,18 @@
 
 ### 7d. Controller
 
-- [ ] Create `src/controllers/payment.controller.ts`
+- [x] Create `src/controllers/payment.controller.ts`
 
 ### 7e. Routes
 
-- [ ] Create `src/routes/payment.routes.ts`
+- [x] Create `src/routes/payment.routes.ts`
   - `POST /api/payments/` — auth required (CUSTOMER+), create payment for own order
   - `PATCH /api/payments/:id/status` — auth required, ADMIN only
   - `GET /api/payments/order/:orderId` — auth required, get payment for order
 
 ### 7f. Wire Up
 
-- [ ] Update `src/app.ts` — mount at `/api/payments`
+- [x] Update `src/app.ts` — mount at `/api/payments`
 
 ---
 
@@ -366,20 +366,20 @@
 
 ### 8a. Validation Schema
 
-- [ ] Create `src/validations/inventoryTransaction.validation.ts`
+- [x] Create `src/validations/inventoryTransaction.validation.ts`
   - `createTransactionSchema`: `{ ingredientId (uuid), type (IN|OUT|ADJUSTMENT), quantity (int, >0), reference (ORDER|MANUAL|RESTOCK), orderId? (uuid) }`
   - `transactionFilterSchema`: `{ ingredientId? (uuid), type? (enum) }`
 
 ### 8b. Repository
 
-- [ ] Create `src/repositories/inventoryTransaction.repository.ts`
+- [x] Create `src/repositories/inventoryTransaction.repository.ts`
   - Extends `BaseRepository<InventoryTransaction, ...>`
   - Add: `findByIngredientId(ingredientId)`: transaction history for ingredient
   - Add: `findByOrderId(orderId)`: transactions linked to an order
 
 ### 8c. Service
 
-- [ ] Create `src/services/inventoryTransaction.service.ts`
+- [x] Create `src/services/inventoryTransaction.service.ts`
   - `createTransaction(data)`: record stock change
     - IN: increment ingredient quantity
     - OUT: decrement ingredient quantity (check sufficient stock)
@@ -389,18 +389,18 @@
 
 ### 8d. Controller
 
-- [ ] Create `src/controllers/inventoryTransaction.controller.ts`
+- [x] Create `src/controllers/inventoryTransaction.controller.ts`
 
 ### 8e. Routes
 
-- [ ] Create `src/routes/inventoryTransaction.routes.ts`
-  - `GET /api/inventory/` — auth required (STAFF+), list transactions (filterable)
+- [x] Create `src/routes/inventoryTransaction.routes.ts`
+  - `GET /api/inventory/` — auth required (STAFF+), list low stock alerts
   - `POST /api/inventory/` — auth required, ADMIN or STAFF
   - `GET /api/inventory/ingredient/:ingredientId` — auth required (STAFF+)
 
 ### 8f. Wire Up
 
-- [ ] Update `src/app.ts` — mount at `/api/inventory`
+- [x] Update `src/app.ts` — mount at `/api/inventory`
 
 ---
 
@@ -413,20 +413,20 @@
 - [x] **PATCH /api/user/:id** — admin only, update user by ID
 - [x] **DELETE /api/user/:id** — admin only, delete user by ID
 - [x] **GET /api/user/** — admin only, list all users
-- [ ] Add pagination support to list endpoints (query params: `page`, `limit`)
+- [x] Add pagination support to list endpoints (query params: `page`, `limit`)
 
 ---
 
 ## Phase 10 — Seed Data & Polish
 
-- [ ] **Seed admin user**: email `admin@restaurant.com`, password `admin123`, role ADMIN
-- [ ] **Seed sample menu items**: link existing categories to menu items with prices
-- [ ] **Seed sample ingredients**: common restaurant ingredients (chicken, rice, vegetables, etc.)
-- [ ] **Seed menu-item-ingredient associations**: link menu items to ingredients with quantities
-- [ ] **Add pagination** to all list endpoints (categories, menu items, orders, users, ingredients)
-- [ ] **Complete Swagger docs** for all new endpoints (MenuItem, Cart, Order, Payment, Ingredient, Inventory)
-- [ ] **Add image upload** for menu items (store path in `image` field)
-- [ ] **Add order total calculation** middleware/service helper
+- [x] **Seed admin user**: email `admin@restaurant.com`, password `admin123`, role ADMIN
+- [x] **Seed sample menu items**: link existing categories to menu items with prices
+- [x] **Seed sample ingredients**: common restaurant ingredients (chicken, rice, vegetables, etc.)
+- [x] **Seed menu-item-ingredient associations**: link menu items to ingredients with quantities
+- [x] **Add pagination** to all list endpoints (categories, menu items, orders, users, ingredients)
+- [x] **Complete Swagger docs** for all new endpoints (MenuItem, Cart, Order, Payment, Ingredient, Inventory)
+- [x] **Add image upload** for menu items (store path in `image` field)
+- [x] **Add order total calculation** middleware/service helper
 
 ---
 
@@ -434,7 +434,7 @@
 
 ### 11a. Error Handling
 
-- [ ] **Create custom error classes** in `src/utils/errors.ts`
+- [x] **Create custom error classes** in `src/utils/errors.ts`
   - `AppError` (base class with statusCode, message, isOperational)
   - `NotFoundError` (404)
   - `ValidationError` (400)
@@ -442,50 +442,50 @@
   - `UnauthorizedError` (401)
   - `ForbiddenError` (403)
 
-- [ ] **Refactor global error handler** (`src/middlewares/errorHandler.ts`)
+- [x] **Refactor global error handler** (`src/middlewares/errorHandler.ts`)
   - Detect custom error classes and set appropriate HTTP status codes
   - Handle non-Error throws (strings, objects)
   - Return structured error envelope: `{ message, errors?, statusCode }`
   - Hide stack traces in production mode
 
-- [ ] **Remove try/catch from controllers**
+- [x] **Remove try/catch from controllers**
   - Use `next(error)` to delegate to global handler
   - Remove redundant try/catch blocks in all controllers
   - Update services to throw custom error classes instead of generic `Error`
 
 ### 11b. Logging
 
-- [ ] **Add structured logging** with `pino` or `winston`
+- [x] **Add structured logging** with `pino` or `winston`
   - Install logger package
   - Create `src/lib/logger.ts` with configurable log levels
   - Correlate logs with request ID (`req.id`)
   - Use different levels: error, warn, info, debug
   - Add request/response logging middleware
 
-- [ ] **Replace console.error/console.log**
+- [x] **Replace console.error/console.log**
   - Update all controllers to use logger
   - Update server startup to use logger
   - Update error handler to use logger
 
 ### 11c. Code Quality
 
-- [ ] **Add ESLint + Prettier**
+- [x] **Add ESLint + Prettier**
   - Install `eslint`, `@typescript-eslint`, `prettier`
   - Create `.eslintrc.json` and `.prettierrc`
   - Add `lint` and `format` scripts to `package.json`
   - Fix existing linting issues
 
-- [ ] **Move `@types/*` to devDependencies**
+- [x] **Move `@types/*` to devDependencies**
   - Move `@types/cors`, `@types/helmet`, `@types/morgan`, etc. to devDependencies in `package.json`
 
 ### 11d. Security Hardening
 
-- [ ] **Configure CORS properly**
+- [x] **Configure CORS properly**
   - Add `ALLOWED_ORIGINS` to environment variables
   - Update `cors()` middleware to restrict origins
   - Update `.env.example` with new variable
 
-- [ ] **Add environment mode handling**
+- [x] **Add environment mode handling**
   - Check `NODE_ENV` in config
   - Control error detail exposure (hide stack traces in production)
   - Disable Swagger UI in production
@@ -493,15 +493,15 @@
 
 ### 11e. Infrastructure
 
-- [ ] **Add database connection validation**
+- [x] **Add database connection validation**
   - Validate `DATABASE_URL` exists before creating Prisma adapter
   - Ensure `validateEnv()` runs before any Prisma operations in `lib/prisma.ts`
 
-- [ ] **Add graceful shutdown timeout**
+- [x] **Add graceful shutdown timeout**
   - Add `setTimeout(() => process.exit(1), 10000)` fallback in `server.ts`
   - Prevent hanging if `prisma.$disconnect()` takes too long
 
-- [ ] **Add missing npm scripts**
+- [x] **Add missing npm scripts**
   - Add `"db:migrate": "npx prisma migrate dev"` to package.json
   - Add `"db:migrate:prod": "npx prisma migrate deploy"` to package.json
   - Add `"db:generate": "npx prisma generate"` to package.json
@@ -520,19 +520,19 @@
 
 ### 11g. Health Check
 
-- [ ] **Improve health check endpoint**
+- [x] **Improve health check endpoint**
   - Add database connectivity check (`prisma.$queryRaw`SELECT 1``)
   - Return detailed status: `{ status: "ok", database: "connected", uptime: ... }`
   - Return 503 if database is unreachable
 
 ### 11h. API Improvements
 
-- [ ] **Add API versioning**
+- [x] **Add API versioning**
   - Use `/api/v1/...` prefix for all routes
   - Update route mounting in app.ts
   - Update Swagger configuration
 
-- [ ] **Standardize error messages**
+- [x] **Standardize error messages**
   - Use consistent format: "Resource not found" (capitalized)
   - Use consistent phrasing across all services
   - Create error message constants

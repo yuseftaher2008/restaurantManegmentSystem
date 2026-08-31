@@ -6,7 +6,7 @@ import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { validateEnv, BCRYPT_SALT_ROUNDS, JWT_SECRET } from "./config/env";
+import { validateEnv, BCRYPT_SALT_ROUNDS, JWT_SECRET, ALLOWED_ORIGINS } from "./config/env";
 import swaggerOptions from "./config/swagger";
 import { Role } from "../generated/prisma/enums";
 import { UserRepository } from "./repositories/user.repository";
@@ -34,11 +34,25 @@ import { CartItemRepository } from "./repositories/cartItem.repository";
 import { CartService } from "./services/cart.service";
 import { CartController } from "./controllers/cart.controller";
 import { createCartRouter } from "./routes/cart.routes";
+import { OrderRepository } from "./repositories/order.repository";
+import { OrderItemRepository } from "./repositories/orderItem.repository";
+import { OrderService } from "./services/order.service";
+import { OrderController } from "./controllers/order.controller";
+import { createOrderRouter } from "./routes/order.routes";
+import { PaymentRepository } from "./repositories/payment.repository";
+import { PaymentService } from "./services/payment.service";
+import { PaymentController } from "./controllers/payment.controller";
+import { createPaymentRouter } from "./routes/payment.routes";
+import { InventoryTransactionRepository } from "./repositories/inventoryTransaction.repository";
+import { InventoryTransactionService } from "./services/inventoryTransaction.service";
+import { InventoryTransactionController } from "./controllers/inventoryTransaction.controller";
+import { createInventoryTransactionRouter } from "./routes/inventoryTransaction.routes";
 import { AuthMiddleware } from "./middlewares/auth.middleware";
 import { AuthorizationMiddleware } from "./middlewares/authorize.middleware";
 import { requestId } from "./middlewares/requestId";
 
 import { errorHandler } from "./middlewares/errorHandler";
+import { prisma } from "../lib/prisma";
 
 
 
@@ -69,6 +83,19 @@ const cartRepository = new CartRepository();
 const cartItemRepository = new CartItemRepository();
 const cartService = new CartService(cartRepository, cartItemRepository, menuItemRepository);
 const cartController = new CartController(cartService);
+
+const orderRepository = new OrderRepository();
+const orderItemRepository = new OrderItemRepository();
+const orderService = new OrderService(orderRepository, orderItemRepository, cartRepository, cartItemRepository, menuItemRepository);
+const orderController = new OrderController(orderService);
+
+const paymentRepository = new PaymentRepository();
+const paymentService = new PaymentService(paymentRepository, orderRepository);
+const paymentController = new PaymentController(paymentService);
+
+const inventoryTransactionRepository = new InventoryTransactionRepository();
+const inventoryTransactionService = new InventoryTransactionService(inventoryTransactionRepository, ingredientRepository);
+const inventoryTransactionController = new InventoryTransactionController(inventoryTransactionService);
 
 const authMiddleware = new AuthMiddleware(JWT_SECRET);
 const adminAuthorization = new AuthorizationMiddleware([
@@ -104,7 +131,9 @@ app.use(requestId);
 
 app.use(helmet());
 
-app.use(cors());
+app.use(cors({
+  origin: ALLOWED_ORIGINS.includes("*") ? true : ALLOWED_ORIGINS,
+}));
 
 
 app.use(morgan("combined"));
@@ -128,11 +157,25 @@ app.use(generalLimiter);
 
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
+app.get("/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      status: "ok",
+      database: "connected",
+      uptime: process.uptime(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "error",
+      database: "disconnected",
+    });
+  }
 });
 
 
@@ -172,6 +215,21 @@ app.use(
 app.use(
     "/api/cart",
     createCartRouter(cartController, authMiddleware, customerAuthorization)
+);
+
+app.use(
+    "/api/orders",
+    createOrderRouter(orderController, authMiddleware, customerAuthorization, customerAuthorization)
+);
+
+app.use(
+    "/api/payments",
+    createPaymentRouter(paymentController, authMiddleware, customerAuthorization, adminAuthorization)
+);
+
+app.use(
+    "/api/inventory",
+    createInventoryTransactionRouter(inventoryTransactionController, authMiddleware, ingredientAuthorization)
 );
 
 app.use(errorHandler);

@@ -15,4 +15,17 @@ export class UserRepository extends BaseRepository<User, UserCreateInput, UserUp
             where: { email }
         });
     }
+
+    async findPaginated(page: number, limit: number): Promise<{ users: User[]; total: number }> {
+        const skip = (page - 1) * limit;
+        const [users, total] = await Promise.all([
+            prisma.user.findMany({
+                skip,
+                take: limit,
+                orderBy: { createdAt: "desc" },
+            }),
+            prisma.user.count(),
+        ]);
+        return { users, total };
+    }
 }

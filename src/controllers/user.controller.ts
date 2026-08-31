@@ -77,8 +77,10 @@ export class UserController {
 
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-            const users = await this.userService.getAll();
-            res.json({ users });
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 20;
+            const result = await this.userService.getAll(page, limit);
+            res.json({ message: "users retrieved", data: result });
         } catch (error) {
             console.error("[GET ALL USERS ERROR]", error);
             res.status(400).json({ message: "Failed to get users" });

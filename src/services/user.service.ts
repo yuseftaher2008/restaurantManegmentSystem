@@ -67,9 +67,14 @@ export class UserService {
         return safeUser;
     }
 
-    async getAll(): Promise<Omit<User, 'password'>[]> {
-        const users = await this.userRepository.findAll();
-        return users.map(({ password: _password, ...safeUser }) => safeUser);
+    async getAll(page: number = 1, limit: number = 20): Promise<{ users: Omit<User, 'password'>[]; total: number; page: number; limit: number }> {
+        const { users, total } = await this.userRepository.findPaginated(page, limit);
+        return {
+            users: users.map(({ password: _password, ...safeUser }) => safeUser),
+            total,
+            page,
+            limit,
+        };
     }
 
     async update(id: string, data: UpdateUserInput): Promise<Omit<User, 'password'>> {
